@@ -261,3 +261,708 @@
       padding:10px 12px;
       background:#fff;
     }
+
+    .manager-name{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .swatch{
+      width:18px;
+      height:18px;
+      border-radius:6px;
+      border:1px solid rgba(0,0,0,.1);
+      display:inline-block;
+      vertical-align:middle;
+    }
+
+    @media (max-width: 900px){
+      .span-2,.span-3,.span-4,.span-6{grid-column:span 12}
+      table{min-width:1300px}
+      h1{font-size:1.5rem}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Gestió mèdica familiar</h1>
+    <div class="sub">Versió editable per GitHub Pages. Ara sí, amb més control i menys Notion fent de les seves.</div>
+
+    <div class="card form-card">
+      <div class="grid">
+        <div class="field span-4">
+          <label for="procediment">Cita / Procediment</label>
+          <input id="procediment" type="text" placeholder="Ex.: 👓 Revisió anual, analítica, vacuna..." />
+        </div>
+
+        <div class="field span-2">
+          <label for="pacient">Pacient</label>
+          <select id="pacient"></select>
+        </div>
+
+        <div class="field span-3">
+          <label for="especialitat">Especialitat</label>
+          <select id="especialitat"></select>
+          <div class="inline-tools">
+            <button class="btn-secondary" type="button" onclick="openManager('especialitats')">Gestionar</button>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label for="data">Data</label>
+          <input id="data" type="date" />
+        </div>
+
+        <div class="field span-1">
+          <label for="hora">Hora</label>
+          <input id="hora" type="time" />
+        </div>
+
+        <div class="field span-2">
+          <label for="estat">Estat</label>
+          <div style="display:flex;align-items:center;gap:8px;height:42px;">
+            <input id="estat" type="checkbox" style="width:18px;height:18px;" />
+            <span>Realitzat</span>
+          </div>
+        </div>
+
+        <div class="field span-3">
+          <label for="catalogRef">Catàleg ref.</label>
+          <select id="catalogRef"></select>
+          <div class="inline-tools">
+            <button class="btn-secondary" type="button" onclick="openManager('catalogRefs')">Gestionar</button>
+          </div>
+        </div>
+
+        <div class="field span-3">
+          <label for="centre">Centre</label>
+          <select id="centre"></select>
+          <div class="inline-tools">
+            <button class="btn-secondary" type="button" onclick="openManager('centres')">Gestionar</button>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label for="metge">Metge / Metgessa</label>
+          <select id="metge"></select>
+          <div class="inline-tools">
+            <button class="btn-secondary" type="button" onclick="openManager('metges')">Gestionar</button>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label for="cobertura">Cobertura</label>
+          <select id="cobertura"></select>
+          <div class="inline-tools">
+            <button class="btn-secondary" type="button" onclick="openManager('cobertures')">Gestionar</button>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label for="costReal">Cost real</label>
+          <input id="costReal" type="text" readonly />
+        </div>
+
+        <div class="field span-2">
+          <label for="avis">Avís</label>
+          <div style="display:flex;align-items:center;gap:8px;height:42px;">
+            <input id="avis" type="checkbox" style="width:18px;height:18px;" />
+            <span>Recordatori anual</span>
+          </div>
+        </div>
+
+        <div class="field span-2">
+          <label for="propera">Pròxima revisió</label>
+          <input id="propera" type="date" readonly />
+        </div>
+
+        <div class="field span-12">
+          <label for="observacions">Observacions</label>
+          <textarea id="observacions" placeholder="Escriu observacions..."></textarea>
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn-primary" id="saveBtn">Afegir registre</button>
+        <button class="btn-soft" type="button" onclick="resetForm()">Netejar formulari</button>
+      </div>
+
+      <div class="hint">
+        <strong>Cita / procediment</strong> és text lliure. Si marques <strong>Avís</strong>, la pròxima revisió es calcula automàticament com <strong>data + 1 any</strong>.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="top-tools">
+        <div>
+          <strong>Registres</strong>
+          <div class="small muted">Guardat local al navegador</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-soft" onclick="exportData()">Exportar JSON</button>
+          <button class="btn-danger" onclick="clearAllData()">Esborrar tot</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cita / Procediment</th>
+              <th>Pacient</th>
+              <th>Especialitat</th>
+              <th>Data</th>
+              <th>Hora</th>
+              <th>Estat</th>
+              <th>Catàleg ref.</th>
+              <th>Centre</th>
+              <th>Metge / ssa</th>
+              <th>Avís</th>
+              <th>Pròxima revisió</th>
+              <th>Cobertura</th>
+              <th>Cost real</th>
+              <th>Observacions</th>
+              <th>Accions</th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <dialog id="managerDialog">
+    <div class="modal-head">
+      <strong id="managerTitle">Gestionar</strong>
+      <button class="btn-soft" type="button" onclick="closeManager()">Tancar</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid">
+        <div class="field span-6">
+          <label for="managerName">Nom</label>
+          <input id="managerName" type="text" />
+        </div>
+        <div class="field span-3" id="managerPriceWrap" style="display:none;">
+          <label for="managerPrice">Preu</label>
+          <input id="managerPrice" type="number" min="0" step="0.01" />
+        </div>
+        <div class="field span-3" id="managerColorWrap">
+          <label for="managerColor">Color pastel</label>
+          <input id="managerColor" type="color" value="#dbeafe" style="height:42px;padding:4px 6px;" />
+        </div>
+      </div>
+
+      <div class="row-actions">
+        <button class="btn-primary" type="button" onclick="saveManagerItem()">Guardar</button>
+        <button class="btn-soft" type="button" onclick="resetManagerForm()">Netejar</button>
+      </div>
+
+      <div class="manager-list" id="managerList"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-soft" type="button" onclick="closeManager()">Tancar</button>
+    </div>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = "gestio_medica_familiar_v2";
+
+    const defaultData = {
+      pacients: [
+        { name: "Ona", color: "#dbeafe" },
+        { name: "Lia", color: "#fce7f3" },
+        { name: "Bea", color: "#dcfce7" },
+        { name: "Xavi", color: "#fef3c7" }
+      ],
+      especialitats: [
+        { name: "Oftalmologia", color: "#dbeafe" },
+        { name: "Dermatologia", color: "#fce7f3" },
+        { name: "Pediatria", color: "#dcfce7" },
+        { name: "Odontologia", color: "#fde68a" },
+        { name: "Medicina general", color: "#e9d5ff" },
+        { name: "Ginecologia", color: "#fecdd3" }
+      ],
+      catalogRefs: [
+        { name: "👓 Revisió optometria", price: 60 },
+        { name: "🧴 Visita dermatologia", price: 90 },
+        { name: "🩺 Consulta privada", price: 75 }
+      ],
+      centres: [
+        { name: "CAP" },
+        { name: "Hospital Sant Joan de Déu" },
+        { name: "Clínica privada" },
+        { name: "Centre mèdic" }
+      ],
+      metges: [
+        { name: "Dra. García" },
+        { name: "Dr. Serra" },
+        { name: "Dra. Puig" },
+        { name: "Dr. Costa" }
+      ],
+      cobertures: [
+        { name: "Mútua" },
+        { name: "Privat" },
+        { name: "SS" }
+      ],
+      records: []
+    };
+
+    let appData = loadData();
+    let editingId = null;
+    let managerType = null;
+    let managerEditingIndex = null;
+
+    const procedimentEl = document.getElementById("procediment");
+    const pacientEl = document.getElementById("pacient");
+    const especialitatEl = document.getElementById("especialitat");
+    const dataEl = document.getElementById("data");
+    const horaEl = document.getElementById("hora");
+    const estatEl = document.getElementById("estat");
+    const catalogRefEl = document.getElementById("catalogRef");
+    const centreEl = document.getElementById("centre");
+    const metgeEl = document.getElementById("metge");
+    const coberturaEl = document.getElementById("cobertura");
+    const costRealEl = document.getElementById("costReal");
+    const avisEl = document.getElementById("avis");
+    const properaEl = document.getElementById("propera");
+    const observacionsEl = document.getElementById("observacions");
+    const recordsBodyEl = document.getElementById("recordsBody");
+    const saveBtnEl = document.getElementById("saveBtn");
+
+    const managerDialog = document.getElementById("managerDialog");
+    const managerTitle = document.getElementById("managerTitle");
+    const managerName = document.getElementById("managerName");
+    const managerPrice = document.getElementById("managerPrice");
+    const managerColor = document.getElementById("managerColor");
+    const managerPriceWrap = document.getElementById("managerPriceWrap");
+    const managerColorWrap = document.getElementById("managerColorWrap");
+    const managerList = document.getElementById("managerList");
+
+    function structuredCloneFallback(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return structuredCloneFallback(defaultData);
+      try {
+        const parsed = JSON.parse(raw);
+        return {
+          pacients: normalizeList(parsed.pacients, defaultData.pacients),
+          especialitats: normalizeList(parsed.especialitats, defaultData.especialitats),
+          catalogRefs: normalizeList(parsed.catalogRefs, defaultData.catalogRefs),
+          centres: normalizeList(parsed.centres, defaultData.centres),
+          metges: normalizeList(parsed.metges, defaultData.metges),
+          cobertures: normalizeList(parsed.cobertures, defaultData.cobertures),
+          records: Array.isArray(parsed.records) ? parsed.records : []
+        };
+      } catch {
+        return structuredCloneFallback(defaultData);
+      }
+    }
+
+    function normalizeList(list, fallback) {
+      if (!Array.isArray(list) || !list.length) return structuredCloneFallback(fallback);
+      return list.map(item => {
+        if (typeof item === "string") return { name: item };
+        return item;
+      });
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    function populateSelect(selectEl, items, formatter = null) {
+      const current = selectEl.value;
+      selectEl.innerHTML = "";
+      items.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        option.textContent = formatter ? formatter(item) : item.name;
+        selectEl.appendChild(option);
+      });
+      if ([...selectEl.options].some(o => o.value === current)) {
+        selectEl.value = current;
+      }
+    }
+
+    function refreshSelects() {
+      populateSelect(pacientEl, appData.pacients);
+      populateSelect(especialitatEl, appData.especialitats);
+      populateSelect(catalogRefEl, appData.catalogRefs, item => `${item.name} (${formatEuro(item.price || 0)})`);
+      populateSelect(centreEl, appData.centres);
+      populateSelect(metgeEl, appData.metges);
+      populateSelect(coberturaEl, appData.cobertures);
+      updateCost();
+    }
+
+    function formatDateDisplay(yyyyMmDd) {
+      if (!yyyyMmDd) return "";
+      const [y, m, d] = yyyyMmDd.split("-");
+      return `${d}/${m}/${y}`;
+    }
+
+    function addOneYear(dateStr) {
+      if (!dateStr) return "";
+      const d = new Date(dateStr + "T00:00:00");
+      d.setFullYear(d.getFullYear() + 1);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
+
+    function formatEuro(value) {
+      return `${Number(value || 0).toFixed(2)} €`;
+    }
+
+    function getCatalogPrice(name) {
+      const item = appData.catalogRefs.find(c => c.name === name);
+      return item ? Number(item.price || 0) : 0;
+    }
+
+    function getColorFromList(type, name) {
+      const list = appData[type] || [];
+      const item = list.find(x => x.name === name);
+      return item?.color || "#e5e7eb";
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function updateCost() {
+      if (coberturaEl.value !== "Privat") {
+        costRealEl.value = "0.00 €";
+      } else {
+        costRealEl.value = formatEuro(getCatalogPrice(catalogRefEl.value));
+      }
+    }
+
+    function updatePropera() {
+      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : "";
+    }
+
+    function validateForm() {
+      if (!procedimentEl.value.trim()) return "Falta cita / procediment.";
+      if (!pacientEl.value) return "Falta pacient.";
+      if (!especialitatEl.value) return "Falta especialitat.";
+      if (!dataEl.value) return "Falta data.";
+      if (!catalogRefEl.value) return "Falta catàleg ref.";
+      if (!centreEl.value) return "Falta centre.";
+      if (!metgeEl.value) return "Falta metge.";
+      if (!coberturaEl.value) return "Falta cobertura.";
+      return "";
+    }
+
+    function getFormRecord() {
+      const cost = coberturaEl.value === "Privat" ? getCatalogPrice(catalogRefEl.value) : 0;
+      return {
+        id: editingId || crypto.randomUUID(),
+        procediment: procedimentEl.value.trim(),
+        pacient: pacientEl.value,
+        especialitat: especialitatEl.value,
+        data: dataEl.value,
+        hora: horaEl.value || "",
+        estat: estatEl.checked,
+        catalogRef: catalogRefEl.value,
+        centre: centreEl.value,
+        metge: metgeEl.value,
+        avis: avisEl.checked,
+        properaRevisio: avisEl.checked ? addOneYear(dataEl.value) : "",
+        cobertura: coberturaEl.value,
+        costReal: cost,
+        observacions: observacionsEl.value.trim()
+      };
+    }
+
+    function saveRecord() {
+      const error = validateForm();
+      if (error) {
+        alert(error);
+        return;
+      }
+
+      const record = getFormRecord();
+
+      if (editingId) {
+        const idx = appData.records.findIndex(r => r.id === editingId);
+        if (idx >= 0) appData.records[idx] = record;
+      } else {
+        appData.records.unshift(record);
+      }
+
+      saveData();
+      renderRecords();
+      resetForm();
+    }
+
+    function editRecord(id) {
+      const r = appData.records.find(x => x.id === id);
+      if (!r) return;
+
+      editingId = id;
+      saveBtnEl.textContent = "Guardar canvis";
+
+      procedimentEl.value = r.procediment || "";
+      pacientEl.value = r.pacient || "";
+      especialitatEl.value = r.especialitat || "";
+      dataEl.value = r.data || "";
+      horaEl.value = r.hora || "";
+      estatEl.checked = !!r.estat;
+      catalogRefEl.value = r.catalogRef || "";
+      centreEl.value = r.centre || "";
+      metgeEl.value = r.metge || "";
+      coberturaEl.value = r.cobertura || "";
+      avisEl.checked = !!r.avis;
+      observacionsEl.value = r.observacions || "";
+      updateCost();
+      updatePropera();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function deleteRecord(id) {
+      if (!confirm("Vols esborrar aquest registre?")) return;
+      appData.records = appData.records.filter(r => r.id !== id);
+      saveData();
+      renderRecords();
+    }
+
+    function renderRecords() {
+      if (!appData.records.length) {
+        recordsBodyEl.innerHTML = `<tr><td colspan="15" class="empty">Encara no hi ha registres.</td></tr>`;
+        return;
+      }
+
+      recordsBodyEl.innerHTML = appData.records.map(r => {
+        const pacientColor = getColorFromList("pacients", r.pacient);
+        const especialitatColor = getColorFromList("especialitats", r.especialitat);
+        return `
+          <tr>
+            <td>${escapeHtml(r.procediment)}</td>
+            <td><span class="mark" style="--mark-color:${pacientColor}">${escapeHtml(r.pacient)}</span></td>
+            <td><span class="mark" style="--mark-color:${especialitatColor}">${escapeHtml(r.especialitat)}</span></td>
+            <td>${formatDateDisplay(r.data)}</td>
+            <td>${r.hora || ""}</td>
+            <td class="center">${r.estat ? '<span class="ok">✔</span>' : '<span class="no">—</span>'}</td>
+            <td>${escapeHtml(r.catalogRef)}</td>
+            <td>${escapeHtml(r.centre)}</td>
+            <td>${escapeHtml(r.metge)}</td>
+            <td class="center">${r.avis ? '<span class="pill">Sí</span>' : '<span class="no">—</span>'}</td>
+            <td>${r.properaRevisio ? formatDateDisplay(r.properaRevisio) : ""}</td>
+            <td>${escapeHtml(r.cobertura)}</td>
+            <td class="right price">${formatEuro(r.costReal)}</td>
+            <td>${escapeHtml(r.observacions || "")}</td>
+            <td>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn-soft" onclick="editRecord('${r.id}')">Editar</button>
+                <button class="btn-danger" onclick="deleteRecord('${r.id}')">Esborrar</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function resetForm() {
+      editingId = null;
+      saveBtnEl.textContent = "Afegir registre";
+      procedimentEl.value = "";
+      pacientEl.selectedIndex = 0;
+      especialitatEl.selectedIndex = 0;
+      dataEl.value = "";
+      horaEl.value = "";
+      estatEl.checked = false;
+      catalogRefEl.selectedIndex = 0;
+      centreEl.selectedIndex = 0;
+      metgeEl.selectedIndex = 0;
+      coberturaEl.selectedIndex = 0;
+      avisEl.checked = false;
+      properaEl.value = "";
+      observacionsEl.value = "";
+      updateCost();
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "gestio-medica-familiar.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function clearAllData() {
+      if (!confirm("Segur que vols esborrar tots els registres i catàlegs personalitzats?")) return;
+      appData = structuredCloneFallback(defaultData);
+      saveData();
+      refreshSelects();
+      renderRecords();
+      resetForm();
+    }
+
+    function managerConfig(type) {
+      const map = {
+        especialitats: { title: "Gestionar especialitats", hasColor: true, hasPrice: false },
+        catalogRefs: { title: "Gestionar catàleg ref.", hasColor: false, hasPrice: true },
+        centres: { title: "Gestionar centres", hasColor: false, hasPrice: false },
+        metges: { title: "Gestionar metges", hasColor: false, hasPrice: false },
+        cobertures: { title: "Gestionar cobertures", hasColor: false, hasPrice: false }
+      };
+      return map[type];
+    }
+
+    function openManager(type) {
+      managerType = type;
+      managerEditingIndex = null;
+      const cfg = managerConfig(type);
+      managerTitle.textContent = cfg.title;
+      managerPriceWrap.style.display = cfg.hasPrice ? "block" : "none";
+      managerColorWrap.style.display = cfg.hasColor ? "block" : "none";
+      resetManagerForm();
+      renderManagerList();
+      managerDialog.showModal();
+    }
+
+    function closeManager() {
+      managerDialog.close();
+      managerType = null;
+      managerEditingIndex = null;
+    }
+
+    function resetManagerForm() {
+      managerEditingIndex = null;
+      managerName.value = "";
+      managerPrice.value = "";
+      managerColor.value = "#dbeafe";
+    }
+
+    function renderManagerList() {
+      const list = appData[managerType] || [];
+      managerList.innerHTML = list.map((item, index) => {
+        const priceText = typeof item.price !== "undefined" ? `<span class="pill">${formatEuro(item.price)}</span>` : "";
+        const colorText = item.color ? `<span class="swatch" style="background:${item.color}"></span>` : "";
+        return `
+          <div class="manager-item">
+            <div class="manager-name">
+              ${colorText}
+              <strong>${escapeHtml(item.name)}</strong>
+              ${priceText}
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn-soft" type="button" onclick="editManagerItem(${index})">Editar</button>
+              <button class="btn-danger" type="button" onclick="deleteManagerItem(${index})">Esborrar</button>
+            </div>
+          </div>
+        `;
+      }).join("") || `<div class="muted">No hi ha elements.</div>`;
+    }
+
+    function saveManagerItem() {
+      if (!managerType) return;
+      const name = managerName.value.trim();
+      if (!name) {
+        alert("Falta el nom.");
+        return;
+      }
+
+      const cfg = managerConfig(managerType);
+      const item = { name };
+
+      if (cfg.hasColor) item.color = managerColor.value || "#dbeafe";
+      if (cfg.hasPrice) {
+        const price = Number(String(managerPrice.value || "0").replace(",", "."));
+        if (Number.isNaN(price)) {
+          alert("El preu no és vàlid.");
+          return;
+        }
+        item.price = price;
+      }
+
+      const list = appData[managerType];
+      const duplicateIndex = list.findIndex((x, i) => x.name.toLowerCase() === name.toLowerCase() && i !== managerEditingIndex);
+      if (duplicateIndex >= 0) {
+        alert("Ja existeix un element amb aquest nom.");
+        return;
+      }
+
+      if (managerEditingIndex === null) {
+        list.push(item);
+      } else {
+        const oldName = list[managerEditingIndex].name;
+        list[managerEditingIndex] = item;
+        renameReferences(managerType, oldName, item.name);
+      }
+
+      saveData();
+      refreshSelects();
+      renderRecords();
+      resetManagerForm();
+      renderManagerList();
+    }
+
+    function editManagerItem(index) {
+      const item = appData[managerType][index];
+      if (!item) return;
+      managerEditingIndex = index;
+      managerName.value = item.name || "";
+      managerPrice.value = typeof item.price !== "undefined" ? item.price : "";
+      managerColor.value = item.color || "#dbeafe";
+    }
+
+    function deleteManagerItem(index) {
+      const list = appData[managerType];
+      const item = list[index];
+      if (!item) return;
+      if (!confirm(`Vols esborrar "${item.name}"?`)) return;
+
+      list.splice(index, 1);
+      removeReferences(managerType, item.name);
+      saveData();
+      refreshSelects();
+      renderRecords();
+      resetManagerForm();
+      renderManagerList();
+    }
+
+    function renameReferences(type, oldName, newName) {
+      appData.records.forEach(r => {
+        if (type === "especialitats" && r.especialitat === oldName) r.especialitat = newName;
+        if (type === "catalogRefs" && r.catalogRef === oldName) r.catalogRef = newName;
+        if (type === "centres" && r.centre === oldName) r.centre = newName;
+        if (type === "metges" && r.metge === oldName) r.metge = newName;
+        if (type === "cobertures" && r.cobertura === oldName) r.cobertura = newName;
+      });
+    }
+
+    function removeReferences(type, name) {
+      appData.records.forEach(r => {
+        if (type === "especialitats" && r.especialitat === name) r.especialitat = "";
+        if (type === "catalogRefs" && r.catalogRef === name) r.catalogRef = "";
+        if (type === "centres" && r.centre === name) r.centre = "";
+        if (type === "metges" && r.metge === name) r.metge = "";
+        if (type === "cobertures" && r.cobertura === name) r.cobertura = "";
+      });
+    }
+
+    coberturaEl.addEventListener("change", updateCost);
+    catalogRefEl.addEventListener("change", updateCost);
+    avisEl.addEventListener("change", updatePropera);
+    dataEl.addEventListener("change", updatePropera);
+    saveBtnEl.addEventListener("click", saveRecord);
+
+    refreshSelects();
+    renderRecords();
+    resetForm();
+  </script>
+</body>
+</html>
