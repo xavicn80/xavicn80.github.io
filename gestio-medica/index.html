@@ -149,9 +149,7 @@
       align-items:center;
     }
 
-    .filters-row{
-      align-items:end;
-    }
+    .filters-row{ align-items:end; }
 
     .filter-box{
       display:flex;
@@ -184,11 +182,11 @@
     }
 
     table{
-      font-weight:400;
       width:100%;
       border-collapse:collapse;
       min-width:1600px;
       background:#fff;
+      font-weight:400;
     }
 
     th,td{
@@ -209,6 +207,9 @@
       letter-spacing:.03em;
       color:#475569;
     }
+
+    th:nth-child(3),td:nth-child(3){min-width:170px;}
+    th:nth-child(8),td:nth-child(8){min-width:180px;white-space:nowrap;}
 
     .center{text-align:center}
     .right{text-align:right}
@@ -244,7 +245,6 @@
       display:inline-block;
       padding:4px 8px;
       border-radius:999px;
-      font-weight:700;
       font-size:.8rem;
       background:#f3f4f6;
       color:#374151;
@@ -320,13 +320,18 @@
       padding:4px 6px;
       margin-bottom:6px;
       line-height:1.3;
-      font-weight:600;
       overflow:hidden;
     }
 
     .legend-note{
       font-size:.8rem;
       color:var(--muted);
+    }
+
+    .loading{
+      padding:12px 0;
+      color:var(--muted);
+      font-size:.9rem;
     }
 
     dialog{
@@ -337,9 +342,7 @@
       box-shadow:0 18px 60px rgba(0,0,0,.2);
     }
 
-    dialog::backdrop{
-      background:rgba(15,23,42,.35);
-    }
+    dialog::backdrop{ background:rgba(15,23,42,.35); }
 
     .modal-head{
       padding:16px 18px;
@@ -395,9 +398,6 @@
       vertical-align:middle;
     }
 
-    th:nth-child(3),td:nth-child(3){min-width:170px;} /* Especialitat */
-    th:nth-child(8),td:nth-child(8){min-width:180px;white-space:nowrap;} /* Centre */
-
     @media (max-width: 900px){
       .span-1,.span-2,.span-3,.span-4,.span-6{grid-column:span 12}
       table{min-width:1300px}
@@ -411,9 +411,11 @@
 <body>
   <div class="wrap">
     <h1>Gestió mèdica familiar</h1>
-    <div class="sub">Versió editable per GitHub Pages. Més neta, més útil i menys folklore.</div>
+    <div class="sub">Versió amb Supabase. Canvia les dues claus del script i ja no dependrà del navegador.</div>
 
     <div class="card form-card">
+      <div class="loading" id="appStatus">Connectant amb Supabase...</div>
+
       <div class="grid">
         <div class="field span-4">
           <label for="procediment">Cita / Procediment</label>
@@ -468,7 +470,7 @@
         </div>
 
         <div class="field span-2">
-          <label for="metge">Metge / Metgessa</label>
+          <label for="metge">Metge</label>
           <select id="metge"></select>
           <div class="inline-tools">
             <button class="btn-secondary" type="button" onclick="openManager('metges')">Gestionar</button>
@@ -513,7 +515,7 @@
       </div>
 
       <div class="hint">
-        <strong>Cita / procediment</strong> és text lliure. Si marques <strong>Avís</strong>, la pròxima revisió es calcula automàticament com <strong>data + 1 any</strong>.
+        Aquesta versió carrega i guarda <strong>registres i catàlegs</strong> a Supabase.
       </div>
     </div>
 
@@ -522,12 +524,11 @@
         <div class="top-head">
           <div>
             <strong>Registres</strong>
-            <div class="small muted">Guardat local al navegador. Quan el passem a Supabase, l'export JSON serà opcional, no obligatori.</div>
+            <div class="small muted">Sincronitzats amb Supabase</div>
           </div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button class="btn-soft" onclick="toggleCalendar()">Calendari mes/setmana</button>
-            <button class="btn-soft" onclick="exportData()">Exportar JSON</button>
-            <button class="btn-danger" onclick="clearAllData()">Esborrar tot</button>
+            <button class="btn-soft" onclick="refreshAll()">Refrescar</button>
           </div>
         </div>
 
@@ -641,50 +642,71 @@
     </div>
   </dialog>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const STORAGE_KEY = "gestio_medica_familiar_v3";
+    const SUPABASE_URL = "https://ocyzoueltbqltzhxeupi.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_LR2EG6IqYX8gVyT4C_b3EQ_FXc_upqO";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const defaultData = {
+    const TABLE_MAP = {
+      pacients: 'pacients',
+      especialitats: 'especialitats',
+      catalogRefs: 'catalog_refs',
+      centres: 'centres',
+      metges: 'metges',
+      cobertures: 'cobertures',
+      records: 'visites_mediques'
+    };
+
+    const defaultSeed = {
       pacients: [
-        { name: "Ona", color: "#dbeafe" },
-        { name: "Lia", color: "#fce7f3" },
-        { name: "Bea", color: "#dcfce7" },
-        { name: "Xavi", color: "#fef3c7" }
+        { name: 'Ona', color: '#dbeafe' },
+        { name: 'Lia', color: '#fce7f3' },
+        { name: 'Bea', color: '#dcfce7' },
+        { name: 'Xavi', color: '#fef3c7' }
       ],
       especialitats: [
-        { name: "Oftalmologia", color: "#dbeafe" },
-        { name: "Dermatologia", color: "#fce7f3" },
-        { name: "Pediatria", color: "#dcfce7" },
-        { name: "Odontologia", color: "#fde68a" },
-        { name: "Medicina general", color: "#e9d5ff" },
-        { name: "Ginecologia", color: "#fecdd3" }
+        { name: 'Oftalmologia', color: '#dbeafe' },
+        { name: 'Dermatologia', color: '#fce7f3' },
+        { name: 'Pediatria', color: '#dcfce7' },
+        { name: 'Odontologia', color: '#fde68a' },
+        { name: 'Medicina general', color: '#e9d5ff' },
+        { name: 'Ginecologia', color: '#fecdd3' }
       ],
       catalogRefs: [
-        { name: "👓 Revisió optometria", price: 60 },
-        { name: "🧴 Visita dermatologia", price: 90 },
-        { name: "🩺 Consulta privada", price: 75 }
+        { name: '👓 Revisió optometria', price: 60 },
+        { name: '🧴 Visita dermatologia', price: 90 },
+        { name: '🩺 Consulta privada', price: 75 }
       ],
       centres: [
-        { name: "CAP" },
-        { name: "Hospital Sant Joan de Déu" },
-        { name: "Clínica privada" },
-        { name: "Centre mèdic" }
+        { name: 'CAP' },
+        { name: 'Hospital Sant Joan de Déu' },
+        { name: 'Clínica privada' },
+        { name: 'Centre mèdic' }
       ],
       metges: [
-        { name: "Dra. García" },
-        { name: "Dr. Serra" },
-        { name: "Dra. Puig" },
-        { name: "Dr. Costa" }
+        { name: 'Dra. García' },
+        { name: 'Dr. Serra' },
+        { name: 'Dra. Puig' },
+        { name: 'Dr. Costa' }
       ],
       cobertures: [
-        { name: "Mútua" },
-        { name: "Privat" },
-        { name: "SS" }
-      ],
+        { name: 'Mútua' },
+        { name: 'Privat' },
+        { name: 'SS' }
+      ]
+    };
+
+    let appData = {
+      pacients: [],
+      especialitats: [],
+      catalogRefs: [],
+      centres: [],
+      metges: [],
+      cobertures: [],
       records: []
     };
 
-    let appData = loadData();
     let editingId = null;
     let managerType = null;
     let managerEditingIndex = null;
@@ -692,22 +714,23 @@
     let calendarView = 'month';
     let calendarDate = new Date();
 
-    const procedimentEl = document.getElementById("procediment");
-    const pacientEl = document.getElementById("pacient");
-    const especialitatEl = document.getElementById("especialitat");
-    const dataEl = document.getElementById("data");
-    const horaEl = document.getElementById("hora");
-    const estatEl = document.getElementById("estat");
-    const catalogRefEl = document.getElementById("catalogRef");
-    const centreEl = document.getElementById("centre");
-    const metgeEl = document.getElementById("metge");
-    const coberturaEl = document.getElementById("cobertura");
-    const costRealEl = document.getElementById("costReal");
-    const avisEl = document.getElementById("avis");
-    const properaEl = document.getElementById("propera");
-    const observacionsEl = document.getElementById("observacions");
-    const recordsBodyEl = document.getElementById("recordsBody");
-    const saveBtnEl = document.getElementById("saveBtn");
+    const appStatusEl = document.getElementById('appStatus');
+    const procedimentEl = document.getElementById('procediment');
+    const pacientEl = document.getElementById('pacient');
+    const especialitatEl = document.getElementById('especialitat');
+    const dataEl = document.getElementById('data');
+    const horaEl = document.getElementById('hora');
+    const estatEl = document.getElementById('estat');
+    const catalogRefEl = document.getElementById('catalogRef');
+    const centreEl = document.getElementById('centre');
+    const metgeEl = document.getElementById('metge');
+    const coberturaEl = document.getElementById('cobertura');
+    const costRealEl = document.getElementById('costReal');
+    const avisEl = document.getElementById('avis');
+    const properaEl = document.getElementById('propera');
+    const observacionsEl = document.getElementById('observacions');
+    const recordsBodyEl = document.getElementById('recordsBody');
+    const saveBtnEl = document.getElementById('saveBtn');
 
     const filterPacientEl = document.getElementById('filterPacient');
     const filterEspecialitatEl = document.getElementById('filterEspecialitat');
@@ -718,59 +741,94 @@
     const calendarGridEl = document.getElementById('calendarGrid');
     const calendarWeekdaysEl = document.getElementById('calendarWeekdays');
 
-    const managerDialog = document.getElementById("managerDialog");
-    const managerTitle = document.getElementById("managerTitle");
-    const managerName = document.getElementById("managerName");
-    const managerPrice = document.getElementById("managerPrice");
-    const managerColor = document.getElementById("managerColor");
-    const managerPriceWrap = document.getElementById("managerPriceWrap");
-    const managerColorWrap = document.getElementById("managerColorWrap");
-    const managerList = document.getElementById("managerList");
+    const managerDialog = document.getElementById('managerDialog');
+    const managerTitle = document.getElementById('managerTitle');
+    const managerName = document.getElementById('managerName');
+    const managerPrice = document.getElementById('managerPrice');
+    const managerColor = document.getElementById('managerColor');
+    const managerPriceWrap = document.getElementById('managerPriceWrap');
+    const managerColorWrap = document.getElementById('managerColorWrap');
+    const managerList = document.getElementById('managerList');
 
-    function structuredCloneFallback(obj) {
-      return JSON.parse(JSON.stringify(obj));
+    function setStatus(text, isError = false) {
+      appStatusEl.textContent = text;
+      appStatusEl.style.color = isError ? '#b91c1c' : '#6b7280';
     }
 
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredCloneFallback(defaultData);
-      try {
-        const parsed = JSON.parse(raw);
-        return {
-          pacients: normalizeList(parsed.pacients, defaultData.pacients),
-          especialitats: normalizeList(parsed.especialitats, defaultData.especialitats),
-          catalogRefs: normalizeList(parsed.catalogRefs, defaultData.catalogRefs),
-          centres: normalizeList(parsed.centres, defaultData.centres),
-          metges: normalizeList(parsed.metges, defaultData.metges),
-          cobertures: normalizeList(parsed.cobertures, defaultData.cobertures),
-          records: Array.isArray(parsed.records) ? parsed.records : []
-        };
-      } catch {
-        return structuredCloneFallback(defaultData);
+    function formatEuro(value) {
+      return `${Number(value || 0).toFixed(2)} €`;
+    }
+
+    function formatDateInput(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateDisplay(yyyyMmDd) {
+      if (!yyyyMmDd) return '';
+      const [y, m, d] = yyyyMmDd.split('-');
+      return `${d}/${m}/${y}`;
+    }
+
+    function addOneYear(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr + 'T00:00:00');
+      d.setFullYear(d.getFullYear() + 1);
+      return formatDateInput(d);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeHtmlAttr(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
+    }
+
+    function getCatalogPrice(name) {
+      const item = appData.catalogRefs.find(c => c.name === name);
+      return item ? Number(item.price || 0) : 0;
+    }
+
+    function getColorFromList(type, name) {
+      const list = appData[type] || [];
+      const item = list.find(x => x.name === name);
+      return item?.color || '#e5e7eb';
+    }
+
+    function updateCost() {
+      if (coberturaEl.value !== 'Privat') {
+        costRealEl.value = '0.00 €';
+      } else {
+        costRealEl.value = formatEuro(getCatalogPrice(catalogRefEl.value));
       }
     }
 
-    function normalizeList(list, fallback) {
-      if (!Array.isArray(list) || !list.length) return structuredCloneFallback(fallback);
-      return list.map(item => typeof item === 'string' ? { name: item } : item);
-    }
-
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    function updatePropera() {
+      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : '';
     }
 
     function populateSelect(selectEl, items, formatter = null) {
       const current = selectEl.value;
-      selectEl.innerHTML = "";
+      selectEl.innerHTML = '';
       items.forEach(item => {
-        const option = document.createElement("option");
+        const option = document.createElement('option');
         option.value = item.name;
         option.textContent = formatter ? formatter(item) : item.name;
         selectEl.appendChild(option);
       });
-      if ([...selectEl.options].some(o => o.value === current)) {
-        selectEl.value = current;
-      }
+      if ([...selectEl.options].some(o => o.value === current)) selectEl.value = current;
     }
 
     function populateFilterSelects() {
@@ -793,68 +851,76 @@
       updateCost();
     }
 
-    function formatDateDisplay(yyyyMmDd) {
-      if (!yyyyMmDd) return "";
-      const [y, m, d] = yyyyMmDd.split("-");
-      return `${d}/${m}/${y}`;
+    async function ensureSeedForTable(type) {
+      const table = TABLE_MAP[type];
+      const { count, error } = await supabaseClient.from(table).select('*', { count: 'exact', head: true });
+      if (error) throw error;
+      if ((count || 0) > 0) return;
+      const seed = defaultSeed[type] || [];
+      if (!seed.length) return;
+      const { error: insertError } = await supabaseClient.from(table).insert(seed);
+      if (insertError) throw insertError;
     }
 
-    function addOneYear(dateStr) {
-      if (!dateStr) return "";
-      const d = new Date(dateStr + "T00:00:00");
-      d.setFullYear(d.getFullYear() + 1);
-      return formatDateInput(d);
+    async function loadCatalog(type, orderBy = 'name') {
+      const table = TABLE_MAP[type];
+      const { data, error } = await supabaseClient.from(table).select('*').order(orderBy, { ascending: true });
+      if (error) throw error;
+      appData[type] = data || [];
     }
 
-    function formatDateInput(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
+    async function loadRecords() {
+      const { data, error } = await supabaseClient.from(TABLE_MAP.records).select('*').order('data', { ascending: true }).order('hora', { ascending: true });
+      if (error) throw error;
+      appData.records = (data || []).map(r => ({
+        id: String(r.id),
+        dbId: r.id,
+        procediment: r.cita || '',
+        pacient: r.pacient || '',
+        especialitat: r.especialitat || '',
+        data: r.data || '',
+        hora: r.hora || '',
+        estat: !!r.estat,
+        catalogRef: r.catalog_ref || '',
+        centre: r.centre || '',
+        metge: r.metge || '',
+        avis: !!r.avis,
+        properaRevisio: r.propera_revisio || '',
+        cobertura: r.cobertura || '',
+        costReal: Number(r.cost_real || 0),
+        observacions: r.observacions || ''
+      }));
     }
 
-    function formatEuro(value) {
-      return `${Number(value || 0).toFixed(2)} €`;
+    async function initSupabaseData() {
+      setStatus('Carregant dades...');
+      await ensureSeedForTable('pacients');
+      await ensureSeedForTable('especialitats');
+      await ensureSeedForTable('catalogRefs');
+      await ensureSeedForTable('centres');
+      await ensureSeedForTable('metges');
+      await ensureSeedForTable('cobertures');
+      await loadCatalog('pacients');
+      await loadCatalog('especialitats');
+      await loadCatalog('catalogRefs');
+      await loadCatalog('centres');
+      await loadCatalog('metges');
+      await loadCatalog('cobertures');
+      await loadRecords();
+      refreshSelects();
+      renderRecords();
+      renderCalendar();
+      resetForm();
+      setStatus('Connectat amb Supabase.');
     }
 
-    function getCatalogPrice(name) {
-      const item = appData.catalogRefs.find(c => c.name === name);
-      return item ? Number(item.price || 0) : 0;
-    }
-
-    function getColorFromList(type, name) {
-      const list = appData[type] || [];
-      const item = list.find(x => x.name === name);
-      return item?.color || '#e5e7eb';
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-    }
-
-    function escapeHtmlAttr(str) {
-      return String(str)
-        .replaceAll('&', '&amp;')
-        .replaceAll('"', '&quot;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;');
-    }
-
-    function updateCost() {
-      if (coberturaEl.value !== 'Privat') {
-        costRealEl.value = '0.00 €';
-      } else {
-        costRealEl.value = formatEuro(getCatalogPrice(catalogRefEl.value));
+    async function refreshAll() {
+      try {
+        await initSupabaseData();
+      } catch (e) {
+        console.error(e);
+        setStatus(`Error: ${e.message}`, true);
       }
-    }
-
-    function updatePropera() {
-      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : '';
     }
 
     function validateForm() {
@@ -872,73 +938,49 @@
     function getFormRecord() {
       const cost = coberturaEl.value === 'Privat' ? getCatalogPrice(catalogRefEl.value) : 0;
       return {
-        id: editingId || crypto.randomUUID(),
-        procediment: procedimentEl.value.trim(),
+        cita: procedimentEl.value.trim(),
         pacient: pacientEl.value,
         especialitat: especialitatEl.value,
         data: dataEl.value,
-        hora: horaEl.value || '',
+        hora: horaEl.value || null,
         estat: estatEl.checked,
-        catalogRef: catalogRefEl.value,
+        catalog_ref: catalogRefEl.value,
         centre: centreEl.value,
         metge: metgeEl.value,
         avis: avisEl.checked,
-        properaRevisio: avisEl.checked ? addOneYear(dataEl.value) : '',
+        propera_revisio: avisEl.checked ? addOneYear(dataEl.value) : null,
         cobertura: coberturaEl.value,
-        costReal: cost,
+        cost_real: cost,
         observacions: observacionsEl.value.trim()
       };
     }
 
-    function saveRecord() {
+    async function saveRecord() {
       const error = validateForm();
-      if (error) {
-        alert(error);
-        return;
+      if (error) return alert(error);
+
+      const payload = getFormRecord();
+      setStatus('Guardant registre...');
+
+      try {
+        if (editingId) {
+          const current = appData.records.find(r => r.id === editingId);
+          if (!current?.dbId) throw new Error('No s\'ha trobat el registre a editar.');
+          const { error: updateError } = await supabaseClient.from(TABLE_MAP.records).update(payload).eq('id', current.dbId);
+          if (updateError) throw updateError;
+        } else {
+          const { error: insertError } = await supabaseClient.from(TABLE_MAP.records).insert(payload);
+          if (insertError) throw insertError;
+        }
+        await loadRecords();
+        renderRecords();
+        renderCalendar();
+        resetForm();
+        setStatus('Registre guardat.');
+      } catch (e) {
+        console.error(e);
+        setStatus(`Error guardant registre: ${e.message}`, true);
       }
-
-      const record = getFormRecord();
-      if (editingId) {
-        const idx = appData.records.findIndex(r => r.id === editingId);
-        if (idx >= 0) appData.records[idx] = record;
-      } else {
-        appData.records.unshift(record);
-      }
-
-      saveData();
-      renderRecords();
-      renderCalendar();
-      resetForm();
-    }
-
-    function editRecord(id) {
-      const r = appData.records.find(x => x.id === id);
-      if (!r) return;
-      editingId = id;
-      saveBtnEl.textContent = 'Guardar canvis';
-      procedimentEl.value = r.procediment || '';
-      pacientEl.value = r.pacient || '';
-      especialitatEl.value = r.especialitat || '';
-      dataEl.value = r.data || '';
-      horaEl.value = r.hora || '';
-      estatEl.checked = !!r.estat;
-      catalogRefEl.value = r.catalogRef || '';
-      centreEl.value = r.centre || '';
-      metgeEl.value = r.metge || '';
-      coberturaEl.value = r.cobertura || '';
-      avisEl.checked = !!r.avis;
-      observacionsEl.value = r.observacions || '';
-      updateCost();
-      updatePropera();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function deleteRecord(id) {
-      if (!confirm('Vols esborrar aquest registre?')) return;
-      appData.records = appData.records.filter(r => r.id !== id);
-      saveData();
-      renderRecords();
-      renderCalendar();
     }
 
     function getFilteredRecords() {
@@ -946,18 +988,13 @@
       const fe = filterEspecialitatEl.value;
       const ff = filterFromEl.value;
       const ft = filterToEl.value;
-
       return appData.records.filter(r => {
         if (fp && r.pacient !== fp) return false;
         if (fe && r.especialitat !== fe) return false;
         if (ff && r.data < ff) return false;
         if (ft && r.data > ft) return false;
         return true;
-      }).sort((a,b) => {
-        const ad = `${a.data || ''} ${a.hora || ''}`;
-        const bd = `${b.data || ''} ${b.hora || ''}`;
-        return ad.localeCompare(bd);
-      });
+      }).sort((a, b) => `${a.data || ''} ${a.hora || ''}`.localeCompare(`${b.data || ''} ${b.hora || ''}`));
     }
 
     function renderRecords() {
@@ -966,7 +1003,6 @@
         recordsBodyEl.innerHTML = `<tr><td colspan="15" class="empty">No hi ha registres amb aquests filtres.</td></tr>`;
         return;
       }
-
       recordsBodyEl.innerHTML = records.map(r => {
         const pacientColor = getColorFromList('pacients', r.pacient);
         const especialitatColor = getColorFromList('especialitats', r.especialitat);
@@ -997,44 +1033,62 @@
       }).join('');
     }
 
+    function editRecord(id) {
+      const r = appData.records.find(x => x.id === id);
+      if (!r) return;
+      editingId = id;
+      saveBtnEl.textContent = 'Guardar canvis';
+      procedimentEl.value = r.procediment || '';
+      pacientEl.value = r.pacient || '';
+      especialitatEl.value = r.especialitat || '';
+      dataEl.value = r.data || '';
+      horaEl.value = r.hora || '';
+      estatEl.checked = !!r.estat;
+      catalogRefEl.value = r.catalogRef || '';
+      centreEl.value = r.centre || '';
+      metgeEl.value = r.metge || '';
+      coberturaEl.value = r.cobertura || '';
+      avisEl.checked = !!r.avis;
+      observacionsEl.value = r.observacions || '';
+      updateCost();
+      updatePropera();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function deleteRecord(id) {
+      const current = appData.records.find(r => r.id === id);
+      if (!current?.dbId) return;
+      if (!confirm('Vols esborrar aquest registre?')) return;
+      try {
+        const { error } = await supabaseClient.from(TABLE_MAP.records).delete().eq('id', current.dbId);
+        if (error) throw error;
+        await loadRecords();
+        renderRecords();
+        renderCalendar();
+        setStatus('Registre esborrat.');
+      } catch (e) {
+        console.error(e);
+        setStatus(`Error esborrant registre: ${e.message}`, true);
+      }
+    }
+
     function resetForm() {
       editingId = null;
       saveBtnEl.textContent = 'Afegir registre';
       procedimentEl.value = '';
-      pacientEl.selectedIndex = 0;
-      especialitatEl.selectedIndex = 0;
+      if (pacientEl.options.length) pacientEl.selectedIndex = 0;
+      if (especialitatEl.options.length) especialitatEl.selectedIndex = 0;
       dataEl.value = '';
       horaEl.value = '';
       estatEl.checked = false;
-      catalogRefEl.selectedIndex = 0;
-      centreEl.selectedIndex = 0;
-      metgeEl.selectedIndex = 0;
-      coberturaEl.selectedIndex = 0;
+      if (catalogRefEl.options.length) catalogRefEl.selectedIndex = 0;
+      if (centreEl.options.length) centreEl.selectedIndex = 0;
+      if (metgeEl.options.length) metgeEl.selectedIndex = 0;
+      if (coberturaEl.options.length) coberturaEl.selectedIndex = 0;
       avisEl.checked = false;
       properaEl.value = '';
       observacionsEl.value = '';
       updateCost();
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'gestio-medica-familiar.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function clearAllData() {
-      if (!confirm('Segur que vols esborrar tots els registres i catàlegs personalitzats?')) return;
-      appData = structuredCloneFallback(defaultData);
-      saveData();
-      refreshSelects();
-      renderRecords();
-      renderCalendar();
-      resetForm();
-      clearFilters();
     }
 
     function managerConfig(type) {
@@ -1081,7 +1135,7 @@
           <div class="manager-item">
             <div class="manager-name">
               ${colorText}
-              <strong>${escapeHtml(item.name)}</strong>
+              <span>${escapeHtml(item.name)}</span>
               ${priceText}
             </div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -1093,49 +1147,6 @@
       }).join('') || `<div class="muted">No hi ha elements.</div>`;
     }
 
-    function saveManagerItem() {
-      if (!managerType) return;
-      const name = managerName.value.trim();
-      if (!name) {
-        alert('Falta el nom.');
-        return;
-      }
-
-      const cfg = managerConfig(managerType);
-      const item = { name };
-      if (cfg.hasColor) item.color = managerColor.value || '#dbeafe';
-      if (cfg.hasPrice) {
-        const price = Number(String(managerPrice.value || '0').replace(',', '.'));
-        if (Number.isNaN(price)) {
-          alert('El preu no és vàlid.');
-          return;
-        }
-        item.price = price;
-      }
-
-      const list = appData[managerType];
-      const duplicateIndex = list.findIndex((x, i) => x.name.toLowerCase() === name.toLowerCase() && i !== managerEditingIndex);
-      if (duplicateIndex >= 0) {
-        alert('Ja existeix un element amb aquest nom.');
-        return;
-      }
-
-      if (managerEditingIndex === null) {
-        list.push(item);
-      } else {
-        const oldName = list[managerEditingIndex].name;
-        list[managerEditingIndex] = item;
-        renameReferences(managerType, oldName, item.name);
-      }
-
-      saveData();
-      refreshSelects();
-      renderRecords();
-      renderCalendar();
-      resetManagerForm();
-      renderManagerList();
-    }
-
     function editManagerItem(index) {
       const item = appData[managerType][index];
       if (!item) return;
@@ -1145,39 +1156,119 @@
       managerColor.value = item.color || '#dbeafe';
     }
 
-    function deleteManagerItem(index) {
+    async function saveManagerItem() {
+      if (!managerType) return;
+      const name = managerName.value.trim();
+      if (!name) return alert('Falta el nom.');
+      const cfg = managerConfig(managerType);
+      const table = TABLE_MAP[managerType];
+      const list = appData[managerType];
+
+      const duplicateIndex = list.findIndex((x, i) => x.name.toLowerCase() === name.toLowerCase() && i !== managerEditingIndex);
+      if (duplicateIndex >= 0) return alert('Ja existeix un element amb aquest nom.');
+
+      const payload = { name };
+      if (cfg.hasColor) payload.color = managerColor.value || '#dbeafe';
+      if (cfg.hasPrice) {
+        const price = Number(String(managerPrice.value || '0').replace(',', '.'));
+        if (Number.isNaN(price)) return alert('El preu no és vàlid.');
+        payload.price = price;
+      }
+
+      try {
+        if (managerEditingIndex === null) {
+          const { error } = await supabaseClient.from(table).insert(payload);
+          if (error) throw error;
+        } else {
+          const current = list[managerEditingIndex];
+          const { error } = await supabaseClient.from(table).update(payload).eq('id', current.id);
+          if (error) throw error;
+          await renameReferences(managerType, current.name, payload.name);
+        }
+        await loadCatalog(managerType);
+        refreshSelects();
+        await loadRecords();
+        renderRecords();
+        renderCalendar();
+        resetManagerForm();
+        renderManagerList();
+        setStatus('Catàleg actualitzat.');
+      } catch (e) {
+        console.error(e);
+        setStatus(`Error actualitzant catàleg: ${e.message}`, true);
+      }
+    }
+
+    async function deleteManagerItem(index) {
       const list = appData[managerType];
       const item = list[index];
       if (!item) return;
       if (!confirm(`Vols esborrar "${item.name}"?`)) return;
-      list.splice(index, 1);
-      removeReferences(managerType, item.name);
-      saveData();
-      refreshSelects();
-      renderRecords();
-      renderCalendar();
-      resetManagerForm();
-      renderManagerList();
+      try {
+        const { error } = await supabaseClient.from(TABLE_MAP[managerType]).delete().eq('id', item.id);
+        if (error) throw error;
+        await removeReferences(managerType, item.name);
+        await loadCatalog(managerType);
+        refreshSelects();
+        await loadRecords();
+        renderRecords();
+        renderCalendar();
+        resetManagerForm();
+        renderManagerList();
+        setStatus('Element esborrat.');
+      } catch (e) {
+        console.error(e);
+        setStatus(`Error esborrant catàleg: ${e.message}`, true);
+      }
     }
 
-    function renameReferences(type, oldName, newName) {
-      appData.records.forEach(r => {
-        if (type === 'especialitats' && r.especialitat === oldName) r.especialitat = newName;
-        if (type === 'catalogRefs' && r.catalogRef === oldName) r.catalogRef = newName;
-        if (type === 'centres' && r.centre === oldName) r.centre = newName;
-        if (type === 'metges' && r.metge === oldName) r.metge = newName;
-        if (type === 'cobertures' && r.cobertura === oldName) r.cobertura = newName;
-      });
+    async function renameReferences(type, oldName, newName) {
+      if (oldName === newName) return;
+      const fieldMap = {
+        especialitats: 'especialitat',
+        catalogRefs: 'catalog_ref',
+        centres: 'centre',
+        metges: 'metge',
+        cobertures: 'cobertura'
+      };
+      const field = fieldMap[type];
+      if (!field) return;
+      const matches = appData.records.filter(r => r[
+        field === 'catalog_ref' ? 'catalogRef' :
+        field === 'especialitat' ? 'especialitat' :
+        field === 'centre' ? 'centre' :
+        field === 'metge' ? 'metge' : 'cobertura'
+      ] === oldName);
+
+      for (const record of matches) {
+        const { error } = await supabaseClient.from(TABLE_MAP.records).update({ [field]: newName }).eq('id', record.dbId);
+        if (error) throw error;
+      }
     }
 
-    function removeReferences(type, name) {
-      appData.records.forEach(r => {
-        if (type === 'especialitats' && r.especialitat === name) r.especialitat = '';
-        if (type === 'catalogRefs' && r.catalogRef === name) r.catalogRef = '';
-        if (type === 'centres' && r.centre === name) r.centre = '';
-        if (type === 'metges' && r.metge === name) r.metge = '';
-        if (type === 'cobertures' && r.cobertura === name) r.cobertura = '';
-      });
+    async function removeReferences(type, name) {
+      const fieldMap = {
+        especialitats: 'especialitat',
+        catalogRefs: 'catalog_ref',
+        centres: 'centre',
+        metges: 'metge',
+        cobertures: 'cobertura'
+      };
+      const field = fieldMap[type];
+      if (!field) return;
+      const keyMap = {
+        especialitat: 'especialitat',
+        catalog_ref: 'catalogRef',
+        centre: 'centre',
+        metge: 'metge',
+        cobertura: 'cobertura'
+      };
+      const localKey = keyMap[field];
+      const matches = appData.records.filter(r => r[localKey] === name);
+      for (const record of matches) {
+        const { error } = await supabaseClient.from(TABLE_MAP.records).update({ [field]: null }).eq('id', record.dbId);
+        if (error) throw error;
+      }
     }
 
     function clearFilters() {
@@ -1191,10 +1282,8 @@
 
     function setCurrentMonthFilter() {
       const now = new Date();
-      const first = new Date(now.getFullYear(), now.getMonth(), 1);
-      const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-      filterFromEl.value = formatDateInput(first);
-      filterToEl.value = formatDateInput(last);
+      filterFromEl.value = formatDateInput(new Date(now.getFullYear(), now.getMonth(), 1));
+      filterToEl.value = formatDateInput(new Date(now.getFullYear(), now.getMonth() + 1, 0));
       renderRecords();
       renderCalendar();
     }
@@ -1247,8 +1336,7 @@
         const year = calendarDate.getFullYear();
         const month = calendarDate.getMonth();
         calendarTitleEl.textContent = calendarDate.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
-        const firstDay = new Date(year, month, 1);
-        const firstGrid = startOfWeek(firstDay);
+        const firstGrid = startOfWeek(new Date(year, month, 1));
         for (let i = 0; i < 42; i++) {
           const cellDate = new Date(firstGrid);
           cellDate.setDate(firstGrid.getDate() + i);
@@ -1302,9 +1390,10 @@
     dataEl.addEventListener('change', updatePropera);
     saveBtnEl.addEventListener('click', saveRecord);
 
-    refreshSelects();
-    renderRecords();
-    resetForm();
+    initSupabaseData().catch(err => {
+      console.error(err);
+      setStatus(`Error inicial: ${err.message}. Revisa URL, key i noms de taula.`, true);
+    });
   </script>
 </body>
 </html>
