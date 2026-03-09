@@ -184,6 +184,7 @@
     }
 
     table{
+      font-weight:400;
       width:100%;
       border-collapse:collapse;
       min-width:1600px;
@@ -237,7 +238,6 @@
       -webkit-box-decoration-break:clone;
       background:linear-gradient(to top, var(--mark-color) 0 72%, transparent 72% 100%);
       border-radius:3px;
-      font-weight:700;
     }
 
     .pill{
@@ -394,6 +394,9 @@
       display:inline-block;
       vertical-align:middle;
     }
+
+    th:nth-child(3),td:nth-child(3){min-width:170px;} /* Especialitat */
+    th:nth-child(8),td:nth-child(8){min-width:180px;white-space:nowrap;} /* Centre */
 
     @media (max-width: 900px){
       .span-1,.span-2,.span-3,.span-4,.span-6{grid-column:span 12}
@@ -582,7 +585,7 @@
         <table>
           <thead>
             <tr>
-              <th>Cita / Procediment</th>
+              <th>Cita</th>
               <th>Pacient</th>
               <th>Especialitat</th>
               <th>Data</th>
@@ -590,7 +593,7 @@
               <th>Estat</th>
               <th>Catàleg ref.</th>
               <th>Centre</th>
-              <th>Metge / ssa</th>
+              <th>Metge</th>
               <th>Avís</th>
               <th>Pròxima revisió</th>
               <th>Cobertura</th>
