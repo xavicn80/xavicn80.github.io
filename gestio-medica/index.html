@@ -8,26 +8,23 @@
   <title>Gestió mèdica familiar</title>
   <style>
     :root{
-      --bg:#f5f7fb;
+      --bg:#f6f7fb;
       --card:#ffffff;
       --line:#dfe5ef;
       --text:#1f2937;
       --muted:#6b7280;
-      --blue:#dbeafe;
-      --blueText:#1d4ed8;
-      --pink:#fce7f3;
-      --pinkText:#be185d;
-      --green:#dcfce7;
-      --greenText:#15803d;
-      --amber:#fef3c7;
-      --amberText:#b45309;
-      --violet:#ede9fe;
-      --violetText:#6d28d9;
       --danger:#fee2e2;
       --dangerText:#b91c1c;
+      --soft:#f3f4f6;
+      --softText:#374151;
+      --primary:#111827;
+      --primaryText:#ffffff;
+      --accent:#eef2ff;
+      --accentText:#3730a3;
     }
 
-    *{box-sizing:border-box}
+    * { box-sizing:border-box; }
+
     body{
       margin:0;
       font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
@@ -36,19 +33,19 @@
     }
 
     .wrap{
-      max-width:1400px;
+      max-width:1500px;
       margin:0 auto;
       padding:16px;
     }
 
     h1{
-      margin:0 0 12px;
-      font-size:1.9rem;
+      margin:0 0 8px;
+      font-size:1.8rem;
     }
 
     .sub{
       color:var(--muted);
-      margin-bottom:20px;
+      margin-bottom:18px;
     }
 
     .card{
@@ -65,7 +62,7 @@
 
     .grid{
       display:grid;
-      grid-template-columns:repeat(12,1fr);
+      grid-template-columns:repeat(12, 1fr);
       gap:12px;
     }
 
@@ -104,6 +101,13 @@
     .span-6{grid-column:span 6}
     .span-12{grid-column:span 12}
 
+    .inline-tools{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:6px;
+    }
+
     .row-actions{
       display:flex;
       flex-wrap:wrap;
@@ -115,30 +119,15 @@
       border:none;
       border-radius:12px;
       padding:10px 14px;
-      font-size:.95rem;
+      font-size:.92rem;
       font-weight:700;
       cursor:pointer;
     }
 
-    .btn-primary{
-      background:#111827;
-      color:#fff;
-    }
-
-    .btn-secondary{
-      background:#eef2ff;
-      color:#3730a3;
-    }
-
-    .btn-soft{
-      background:#f3f4f6;
-      color:#374151;
-    }
-
-    .btn-danger{
-      background:var(--danger);
-      color:var(--dangerText);
-    }
+    .btn-primary{ background:var(--primary); color:var(--primaryText); }
+    .btn-secondary{ background:var(--accent); color:var(--accentText); }
+    .btn-soft{ background:var(--soft); color:var(--softText); }
+    .btn-danger{ background:var(--danger); color:var(--dangerText); }
 
     .top-tools{
       display:flex;
@@ -158,7 +147,7 @@
     table{
       width:100%;
       border-collapse:collapse;
-      min-width:1400px;
+      min-width:1600px;
       background:#fff;
     }
 
@@ -181,42 +170,14 @@
       color:#475569;
     }
 
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border-radius:999px;
-      padding:5px 10px;
-      font-size:.82rem;
-      font-weight:700;
-      white-space:nowrap;
-    }
-
-    .chip-ona{background:var(--blue);color:var(--blueText)}
-    .chip-lia{background:var(--pink);color:var(--pinkText)}
-    .chip-bea{background:var(--green);color:var(--greenText)}
-    .chip-xavi{background:var(--amber);color:var(--amberText)}
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:28px;
-      padding:4px 8px;
-      border-radius:999px;
-      font-size:.78rem;
-      font-weight:700;
-      background:var(--violet);
-      color:var(--violetText);
-    }
-
-    .muted{color:var(--muted)}
-    .right{text-align:right}
     .center{text-align:center}
+    .right{text-align:right}
     .small{font-size:.82rem}
+    .muted{color:var(--muted)}
+    .price{font-weight:700}
     .ok{color:#15803d;font-weight:700}
     .no{color:#9ca3af}
-    .price{font-weight:700}
+
     .empty{
       padding:24px;
       text-align:center;
@@ -229,566 +190,74 @@
       font-size:.82rem;
     }
 
-    @media (max-width: 900px){
-      .span-2,.span-3,.span-4,.span-6{grid-column:span 12}
-      h1{font-size:1.5rem}
-      .top-tools{align-items:flex-start}
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <h1>Gestió mèdica familiar</h1>
-    <div class="sub">Registre simple per portar visites, proves i revisions sense tornar-se boig. Milagros no fa, però ajuda.</div>
-
-    <div class="card form-card">
-      <div class="grid">
-        <div class="field span-3">
-          <label for="procediment">Cita / Procediment</label>
-          <select id="procediment"></select>
-        </div>
-
-        <div class="field span-2">
-          <label for="pacient">Pacient</label>
-          <select id="pacient"></select>
-        </div>
-
-        <div class="field span-3">
-          <label for="especialitat">Especialitat</label>
-          <select id="especialitat"></select>
-        </div>
-
-        <div class="field span-2">
-          <label for="data">Data</label>
-          <input id="data" type="date" />
-        </div>
-
-        <div class="field span-2">
-          <label for="hora">Hora</label>
-          <input id="hora" type="time" />
-        </div>
-
-        <div class="field span-2">
-          <label for="estat">Estat</label>
-          <div style="display:flex;align-items:center;gap:8px;height:42px;">
-            <input id="estat" type="checkbox" style="width:18px;height:18px;" />
-            <span>Realitzat</span>
-          </div>
-        </div>
-
-        <div class="field span-3">
-          <label for="catalogRef">Catàleg ref.</label>
-          <select id="catalogRef"></select>
-        </div>
-
-        <div class="field span-3">
-          <label for="centre">Centre</label>
-          <select id="centre"></select>
-        </div>
-
-        <div class="field span-2">
-          <label for="metge">Metge / Metgessa</label>
-          <select id="metge"></select>
-        </div>
-
-        <div class="field span-2">
-          <label for="cobertura">Cobertura</label>
-          <select id="cobertura">
-            <option value="Mútua">Mútua</option>
-            <option value="Privat">Privat</option>
-            <option value="SS">SS</option>
-          </select>
-        </div>
-
-        <div class="field span-2">
-          <label for="costReal">Cost real</label>
-          <input id="costReal" type="text" readonly />
-        </div>
-
-        <div class="field span-2">
-          <label for="avis">Avís</label>
-          <div style="display:flex;align-items:center;gap:8px;height:42px;">
-            <input id="avis" type="checkbox" style="width:18px;height:18px;" />
-            <span>Recordatori anual</span>
-          </div>
-        </div>
-
-        <div class="field span-2">
-          <label for="propera">Pròxima revisió</label>
-          <input id="propera" type="date" readonly />
-        </div>
-
-        <div class="field span-12">
-          <label for="observacions">Observacions</label>
-          <textarea id="observacions" placeholder="Escriu observacions..."></textarea>
-        </div>
-      </div>
-
-      <div class="row-actions">
-        <button class="btn-primary" id="saveBtn">Afegir registre</button>
-        <button class="btn-secondary" type="button" onclick="addNewOption('procediments')">+ Nova cita / procediment</button>
-        <button class="btn-secondary" type="button" onclick="addNewOption('especialitats')">+ Nova especialitat</button>
-        <button class="btn-secondary" type="button" onclick="addNewCatalogRef()">+ Nou catàleg ref.</button>
-        <button class="btn-secondary" type="button" onclick="addNewOption('centres')">+ Nou centre</button>
-        <button class="btn-secondary" type="button" onclick="addNewOption('metges')">+ Nou metge</button>
-        <button class="btn-soft" type="button" onclick="resetForm()">Netejar formulari</button>
-      </div>
-
-      <div class="hint">
-        Si marques <strong>Avís</strong>, la pròxima revisió es calcula automàticament com <strong>data + 1 any</strong>.
-        El correu no s'envia sol com un robot amb massa temps lliure: es prepara amb un botó.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="top-tools">
-        <div>
-          <strong>Registres</strong>
-          <div class="small muted">Guardat local al navegador</div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn-soft" onclick="exportData()">Exportar JSON</button>
-          <button class="btn-danger" onclick="clearAllData()">Esborrar tot</button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Cita / Procediment</th>
-              <th>Pacient</th>
-              <th>Especialitat</th>
-              <th>Data</th>
-              <th>Estat</th>
-              <th>Catàleg ref.</th>
-              <th>Centre</th>
-              <th>Metge / ssa</th>
-              <th>Avís</th>
-              <th>Hora</th>
-              <th>Pròxima revisió</th>
-              <th>Cobertura</th>
-              <th>Cost real</th>
-              <th>Observacions</th>
-              <th>Accions</th>
-            </tr>
-          </thead>
-          <tbody id="recordsBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const STORAGE_KEY = "gestio_medica_familiar_v1";
-
-    const defaultData = {
-      procediments: [
-        "👓 Control visual",
-        "🩸 Analítica",
-        "🦷 Revisió dental",
-        "💉 Vacuna",
-        "🧴 Revisió dermatologia",
-        "📷 Prova diagnòstica"
-      ],
-      pacients: ["Ona", "Lia", "Bea", "Xavi"],
-      especialitats: [
-        "Oftalmologia",
-        "Dermatologia",
-        "Pediatria",
-        "Odontologia",
-        "Medicina general",
-        "Ginecologia"
-      ],
-      catalogRefs: [
-        { name: "👓 Revisió optometria", price: 60 },
-        { name: "🧴 Visita dermatologia", price: 90 },
-        { name: "🩺 Consulta privada", price: 75 }
-      ],
-      centres: [
-        "CAP",
-        "Hospital Sant Joan de Déu",
-        "Clínica privada",
-        "Centre mèdic"
-      ],
-      metges: [
-        "Dra. García",
-        "Dr. Serra",
-        "Dra. Puig",
-        "Dr. Costa"
-      ],
-      records: []
-    };
-
-    let appData = loadData();
-    let editingId = null;
-
-    const procedimentEl = document.getElementById("procediment");
-    const pacientEl = document.getElementById("pacient");
-    const especialitatEl = document.getElementById("especialitat");
-    const dataEl = document.getElementById("data");
-    const estatEl = document.getElementById("estat");
-    const catalogRefEl = document.getElementById("catalogRef");
-    const centreEl = document.getElementById("centre");
-    const metgeEl = document.getElementById("metge");
-    const avisEl = document.getElementById("avis");
-    const horaEl = document.getElementById("hora");
-    const coberturaEl = document.getElementById("cobertura");
-    const costRealEl = document.getElementById("costReal");
-    const properaEl = document.getElementById("propera");
-    const observacionsEl = document.getElementById("observacions");
-    const recordsBodyEl = document.getElementById("recordsBody");
-    const saveBtnEl = document.getElementById("saveBtn");
-
-    function loadData() {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return structuredClone(defaultData);
-      try {
-        const parsed = JSON.parse(raw);
-        return {
-          procediments: parsed.procediments || defaultData.procediments,
-          pacients: parsed.pacients || defaultData.pacients,
-          especialitats: parsed.especialitats || defaultData.especialitats,
-          catalogRefs: parsed.catalogRefs || defaultData.catalogRefs,
-          centres: parsed.centres || defaultData.centres,
-          metges: parsed.metges || defaultData.metges,
-          records: parsed.records || []
-        };
-      } catch {
-        return structuredClone(defaultData);
-      }
+    .mark{
+      display:inline;
+      padding:0 2px 2px;
+      border-bottom-width:8px;
+      border-bottom-style:solid;
+      border-radius:4px;
+      font-weight:700;
+      line-height:1.8;
+      background:linear-gradient(to top, var(--mark-color) 0 55%, transparent 55% 100%);
     }
 
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    .pill{
+      display:inline-block;
+      padding:4px 8px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:.8rem;
+      background:#f3f4f6;
+      color:#374151;
+      white-space:nowrap;
     }
 
-    function populateSelect(selectEl, items, valueKey = null) {
-      const current = selectEl.value;
-      selectEl.innerHTML = "";
-      items.forEach(item => {
-        const option = document.createElement("option");
-        if (valueKey) {
-          option.value = item[valueKey];
-          option.textContent = valueKey === "name" ? `${item.name} (${formatEuro(item.price)})` : item[valueKey];
-        } else {
-          option.value = item;
-          option.textContent = item;
-        }
-        selectEl.appendChild(option);
-      });
-      if ([...selectEl.options].some(o => o.value === current)) {
-        selectEl.value = current;
-      }
+    dialog{
+      border:none;
+      border-radius:18px;
+      width:min(560px, calc(100vw - 24px));
+      padding:0;
+      box-shadow:0 18px 60px rgba(0,0,0,.2);
     }
 
-    function refreshSelects() {
-      populateSelect(procedimentEl, appData.procediments);
-      populateSelect(pacientEl, appData.pacients);
-      populateSelect(especialitatEl, appData.especialitats);
-      populateSelect(catalogRefEl, appData.catalogRefs, "name");
-      populateSelect(centreEl, appData.centres);
-      populateSelect(metgeEl, appData.metges);
-      updateCost();
+    dialog::backdrop{
+      background:rgba(15,23,42,.35);
     }
 
-    function formatDateDisplay(yyyyMmDd) {
-      if (!yyyyMmDd) return "";
-      const [y, m, d] = yyyyMmDd.split("-");
-      return `${d}/${m}/${y}`;
+    .modal-head{
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
 
-    function addOneYear(dateStr) {
-      if (!dateStr) return "";
-      const d = new Date(dateStr + "T00:00:00");
-      d.setFullYear(d.getFullYear() + 1);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
+    .modal-body{ padding:16px 18px; }
+    .modal-foot{
+      padding:16px 18px;
+      border-top:1px solid var(--line);
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
     }
 
-    function getCatalogPrice(name) {
-      const item = appData.catalogRefs.find(c => c.name === name);
-      return item ? Number(item.price || 0) : 0;
+    .manager-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:14px;
+      max-height:280px;
+      overflow:auto;
     }
 
-    function formatEuro(value) {
-      return `${Number(value || 0).toFixed(2)} €`;
+    .manager-item{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 12px;
+      background:#fff;
     }
-
-    function updateCost() {
-      if (coberturaEl.value !== "Privat") {
-        costRealEl.value = "0.00 €";
-      } else {
-        costRealEl.value = formatEuro(getCatalogPrice(catalogRefEl.value));
-      }
-    }
-
-    function updatePropera() {
-      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : "";
-    }
-
-    function addNewOption(type) {
-      let label = "";
-      switch (type) {
-        case "procediments": label = "Nova cita / procediment"; break;
-        case "especialitats": label = "Nova especialitat"; break;
-        case "centres": label = "Nou centre"; break;
-        case "metges": label = "Nou metge"; break;
-      }
-      const value = prompt(`${label}:`);
-      if (!value || !value.trim()) return;
-      const clean = value.trim();
-
-      if (!appData[type].includes(clean)) {
-        appData[type].push(clean);
-        saveData();
-        refreshSelects();
-      }
-
-      if (type === "procediments") procedimentEl.value = clean;
-      if (type === "especialitats") especialitatEl.value = clean;
-      if (type === "centres") centreEl.value = clean;
-      if (type === "metges") metgeEl.value = clean;
-    }
-
-    function addNewCatalogRef() {
-      const name = prompt("Nom del nou catàleg ref. (pots posar emoji):");
-      if (!name || !name.trim()) return;
-      const priceText = prompt("Preu en euros:", "0");
-      if (priceText === null) return;
-
-      const price = Number(String(priceText).replace(",", "."));
-      if (Number.isNaN(price)) {
-        alert("El preu no és vàlid.");
-        return;
-      }
-
-      const cleanName = name.trim();
-      const exists = appData.catalogRefs.some(c => c.name === cleanName);
-      if (!exists) {
-        appData.catalogRefs.push({ name: cleanName, price });
-        saveData();
-        refreshSelects();
-      }
-      catalogRefEl.value = cleanName;
-      updateCost();
-    }
-
-    function getPatientChip(name) {
-      const map = {
-        Ona: "chip chip-ona",
-        Lia: "chip chip-lia",
-        Bea: "chip chip-bea",
-        Xavi: "chip chip-xavi"
-      };
-      return `<span class="${map[name] || 'chip'}">${name}</span>`;
-    }
-
-    function buildReminderMail(record) {
-      const subject = encodeURIComponent(`Recordatori revisió mèdica - ${record.pacient}`);
-      const body = encodeURIComponent(
-`Hola Xavi,
-
-Recordatori de revisió mèdica.
-
-Pacient: ${record.pacient}
-Cita / Procediment: ${record.procediment}
-Especialitat: ${record.especialitat}
-Data original: ${formatDateDisplay(record.data)}
-Pròxima revisió: ${formatDateDisplay(record.properaRevisio)}
-Hora: ${record.hora || "-"}
-Centre: ${record.centre}
-Metge/ssa: ${record.metge}
-Observacions: ${record.observacions || "-"}
-
-Aquest correu s'ha preparat des de la teva web de gestió mèdica.`
-      );
-      return `mailto:xavier_castaner@hotmail.com?subject=${subject}&body=${body}`;
-    }
-
-    function resetForm() {
-      editingId = null;
-      saveBtnEl.textContent = "Afegir registre";
-      procedimentEl.selectedIndex = 0;
-      pacientEl.selectedIndex = 0;
-      especialitatEl.selectedIndex = 0;
-      dataEl.value = "";
-      estatEl.checked = false;
-      catalogRefEl.selectedIndex = 0;
-      centreEl.selectedIndex = 0;
-      metgeEl.selectedIndex = 0;
-      avisEl.checked = false;
-      horaEl.value = "";
-      coberturaEl.value = "Mútua";
-      observacionsEl.value = "";
-      properaEl.value = "";
-      updateCost();
-    }
-
-    function validateForm() {
-      if (!procedimentEl.value) return "Falta cita / procediment.";
-      if (!pacientEl.value) return "Falta pacient.";
-      if (!especialitatEl.value) return "Falta especialitat.";
-      if (!dataEl.value) return "Falta data.";
-      if (!catalogRefEl.value) return "Falta catàleg ref.";
-      if (!centreEl.value) return "Falta centre.";
-      if (!metgeEl.value) return "Falta metge.";
-      if (!coberturaEl.value) return "Falta cobertura.";
-      return "";
-    }
-
-    function getFormRecord() {
-      const cost = coberturaEl.value === "Privat" ? getCatalogPrice(catalogRefEl.value) : 0;
-      const propera = avisEl.checked ? addOneYear(dataEl.value) : "";
-      return {
-        id: editingId || crypto.randomUUID(),
-        procediment: procedimentEl.value,
-        pacient: pacientEl.value,
-        especialitat: especialitatEl.value,
-        data: dataEl.value,
-        estat: estatEl.checked,
-        catalogRef: catalogRefEl.value,
-        centre: centreEl.value,
-        metge: metgeEl.value,
-        avis: avisEl.checked,
-        hora: horaEl.value,
-        properaRevisio: propera,
-        cobertura: coberturaEl.value,
-        costReal: cost,
-        observacions: observacionsEl.value.trim()
-      };
-    }
-
-    function saveRecord() {
-      const error = validateForm();
-      if (error) {
-        alert(error);
-        return;
-      }
-
-      const record = getFormRecord();
-
-      if (editingId) {
-        const idx = appData.records.findIndex(r => r.id === editingId);
-        if (idx >= 0) appData.records[idx] = record;
-      } else {
-        appData.records.unshift(record);
-      }
-
-      saveData();
-      renderRecords();
-      resetForm();
-    }
-
-    function editRecord(id) {
-      const r = appData.records.find(x => x.id === id);
-      if (!r) return;
-
-      editingId = id;
-      saveBtnEl.textContent = "Guardar canvis";
-
-      procedimentEl.value = r.procediment;
-      pacientEl.value = r.pacient;
-      especialitatEl.value = r.especialitat;
-      dataEl.value = r.data;
-      estatEl.checked = !!r.estat;
-      catalogRefEl.value = r.catalogRef;
-      centreEl.value = r.centre;
-      metgeEl.value = r.metge;
-      avisEl.checked = !!r.avis;
-      horaEl.value = r.hora || "";
-      coberturaEl.value = r.cobertura;
-      observacionsEl.value = r.observacions || "";
-      updateCost();
-      updatePropera();
-
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function deleteRecord(id) {
-      if (!confirm("Vols esborrar aquest registre?")) return;
-      appData.records = appData.records.filter(r => r.id !== id);
-      saveData();
-      renderRecords();
-    }
-
-    function renderRecords() {
-      if (!appData.records.length) {
-        recordsBodyEl.innerHTML = `<tr><td colspan="15" class="empty">Encara no hi ha registres.</td></tr>`;
-        return;
-      }
-
-      recordsBodyEl.innerHTML = appData.records.map(r => `
-        <tr>
-          <td>${escapeHtml(r.procediment)}</td>
-          <td>${getPatientChip(r.pacient)}</td>
-          <td>${escapeHtml(r.especialitat)}</td>
-          <td>${formatDateDisplay(r.data)}</td>
-          <td class="center">${r.estat ? '<span class="ok">✔</span>' : '<span class="no">—</span>'}</td>
-          <td>${escapeHtml(r.catalogRef)}</td>
-          <td>${escapeHtml(r.centre)}</td>
-          <td>${escapeHtml(r.metge)}</td>
-          <td class="center">${r.avis ? '<span class="badge">Sí</span>' : '<span class="no">—</span>'}</td>
-          <td>${r.hora || ""}</td>
-          <td>${r.properaRevisio ? formatDateDisplay(r.properaRevisio) : ""}</td>
-          <td>${escapeHtml(r.cobertura)}</td>
-          <td class="right price">${formatEuro(r.costReal)}</td>
-          <td>${escapeHtml(r.observacions || "")}</td>
-          <td>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn-soft" onclick="editRecord('${r.id}')">Editar</button>
-              ${r.avis && r.properaRevisio ? `<button class="btn-secondary" onclick="sendReminder('${r.id}')">Correu</button>` : ""}
-              <button class="btn-danger" onclick="deleteRecord('${r.id}')">Esborrar</button>
-            </div>
-          </td>
-        </tr>
-      `).join("");
-    }
-
-    function sendReminder(id) {
-      const record = appData.records.find(r => r.id === id);
-      if (!record) return;
-      window.location.href = buildReminderMail(record);
-    }
-
-    function clearAllData() {
-      if (!confirm("Segur que vols esborrar tots els registres?")) return;
-      appData.records = [];
-      saveData();
-      renderRecords();
-      resetForm();
-    }
-
-    function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "gestio-medica-familiar.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function escapeHtml(str) {
-      return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
-    coberturaEl.addEventListener("change", updateCost);
-    catalogRefEl.addEventListener("change", updateCost);
-    avisEl.addEventListener("change", updatePropera);
-    dataEl.addEventListener("change", updatePropera);
-    saveBtnEl.addEventListener("click", saveRecord);
-
-    refreshSelects();
-    renderRecords();
-    resetForm();
-  </script>
-</body>
-</html>
