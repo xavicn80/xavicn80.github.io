@@ -95,25 +95,23 @@
       resize:vertical;
     }
 
+    .span-1{grid-column:span 1}
     .span-2{grid-column:span 2}
     .span-3{grid-column:span 3}
     .span-4{grid-column:span 4}
     .span-6{grid-column:span 6}
     .span-12{grid-column:span 12}
 
-    .inline-tools{
+    .inline-tools,
+    .row-actions,
+    .filters-row{
       display:flex;
       gap:8px;
       flex-wrap:wrap;
-      margin-top:6px;
     }
 
-    .row-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:14px;
-    }
+    .row-actions{ margin-top:14px; }
+    .inline-tools{ margin-top:6px; }
 
     button{
       border:none;
@@ -128,15 +126,56 @@
     .btn-secondary{ background:var(--accent); color:var(--accentText); }
     .btn-soft{ background:var(--soft); color:var(--softText); }
     .btn-danger{ background:var(--danger); color:var(--dangerText); }
+    .btn-small{
+      padding:6px 9px;
+      border-radius:9px;
+      font-size:.78rem;
+      font-weight:700;
+    }
 
     .top-tools{
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .top-head{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
       justify-content:space-between;
       align-items:center;
-      padding:14px 16px;
-      border-bottom:1px solid var(--line);
+    }
+
+    .filters-row{
+      align-items:end;
+    }
+
+    .filter-box{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width:140px;
+    }
+
+    .filter-box label{
+      font-size:.78rem;
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.03em;
+    }
+
+    .filter-box input,
+    .filter-box select{
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:9px 10px;
+      background:#fff;
+      font-size:.9rem;
+      color:var(--text);
     }
 
     .table-wrap{
@@ -192,13 +231,13 @@
 
     .mark{
       display:inline;
-      padding:0 2px 2px;
-      border-bottom-width:8px;
-      border-bottom-style:solid;
-      border-radius:4px;
+      padding:0 3px 1px;
+      line-height:1.9;
+      box-decoration-break:clone;
+      -webkit-box-decoration-break:clone;
+      background:linear-gradient(to top, var(--mark-color) 0 72%, transparent 72% 100%);
+      border-radius:3px;
       font-weight:700;
-      line-height:1.8;
-      background:linear-gradient(to top, var(--mark-color) 0 55%, transparent 55% 100%);
     }
 
     .pill{
@@ -210,6 +249,84 @@
       background:#f3f4f6;
       color:#374151;
       white-space:nowrap;
+    }
+
+    .calendar-card{
+      margin-top:16px;
+      padding:14px;
+      display:none;
+    }
+
+    .calendar-card.show{ display:block; }
+
+    .calendar-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .calendar-grid.month{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:8px;
+    }
+
+    .calendar-weekdays,
+    .calendar-grid.week{
+      display:grid;
+      grid-template-columns:repeat(7, 1fr);
+      gap:8px;
+    }
+
+    .weekday{
+      text-align:center;
+      font-size:.78rem;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:700;
+      padding:4px 0;
+    }
+
+    .day-cell{
+      min-height:120px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:8px;
+      background:#fff;
+    }
+
+    .day-cell.other-month{
+      background:#f8fafc;
+      opacity:.55;
+    }
+
+    .day-cell.today{
+      border-color:#c7d2fe;
+      box-shadow:inset 0 0 0 1px #c7d2fe;
+    }
+
+    .day-num{
+      font-size:.85rem;
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    .mini-event{
+      font-size:.74rem;
+      border-radius:8px;
+      padding:4px 6px;
+      margin-bottom:6px;
+      line-height:1.3;
+      font-weight:600;
+      overflow:hidden;
+    }
+
+    .legend-note{
+      font-size:.8rem;
+      color:var(--muted);
     }
 
     dialog{
@@ -279,16 +396,19 @@
     }
 
     @media (max-width: 900px){
-      .span-2,.span-3,.span-4,.span-6{grid-column:span 12}
+      .span-1,.span-2,.span-3,.span-4,.span-6{grid-column:span 12}
       table{min-width:1300px}
       h1{font-size:1.5rem}
+      .calendar-grid.month,
+      .calendar-weekdays,
+      .calendar-grid.week{ min-width:800px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>Gestió mèdica familiar</h1>
-    <div class="sub">Versió editable per GitHub Pages. Ara sí, amb més control i menys Notion fent de les seves.</div>
+    <div class="sub">Versió editable per GitHub Pages. Més neta, més útil i menys folklore.</div>
 
     <div class="card form-card">
       <div class="grid">
@@ -396,14 +516,66 @@
 
     <div class="card">
       <div class="top-tools">
-        <div>
-          <strong>Registres</strong>
-          <div class="small muted">Guardat local al navegador</div>
+        <div class="top-head">
+          <div>
+            <strong>Registres</strong>
+            <div class="small muted">Guardat local al navegador. Quan el passem a Supabase, l'export JSON serà opcional, no obligatori.</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-soft" onclick="toggleCalendar()">Calendari mes/setmana</button>
+            <button class="btn-soft" onclick="exportData()">Exportar JSON</button>
+            <button class="btn-danger" onclick="clearAllData()">Esborrar tot</button>
+          </div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button class="btn-soft" onclick="exportData()">Exportar JSON</button>
-          <button class="btn-danger" onclick="clearAllData()">Esborrar tot</button>
+
+        <div class="filters-row">
+          <div class="filter-box">
+            <label for="filterPacient">Pacient</label>
+            <select id="filterPacient"></select>
+          </div>
+
+          <div class="filter-box">
+            <label for="filterEspecialitat">Especialitat</label>
+            <select id="filterEspecialitat"></select>
+          </div>
+
+          <div class="filter-box">
+            <label for="filterFrom">Des de</label>
+            <input id="filterFrom" type="date" />
+          </div>
+
+          <div class="filter-box">
+            <label for="filterTo">Fins a</label>
+            <input id="filterTo" type="date" />
+          </div>
+
+          <div class="filter-box" style="min-width:auto;">
+            <label>&nbsp;</label>
+            <button class="btn-secondary" type="button" onclick="setCurrentMonthFilter()">Mes actual</button>
+          </div>
+
+          <div class="filter-box" style="min-width:auto;">
+            <label>&nbsp;</label>
+            <button class="btn-soft" type="button" onclick="clearFilters()">Netejar filtres</button>
+          </div>
         </div>
+      </div>
+
+      <div class="calendar-card" id="calendarCard">
+        <div class="calendar-top">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-soft btn-small" onclick="moveCalendar(-1)">←</button>
+            <strong id="calendarTitle">Calendari</strong>
+            <button class="btn-soft btn-small" onclick="moveCalendar(1)">→</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button class="btn-secondary btn-small" onclick="setCalendarView('month')">Mes</button>
+            <button class="btn-soft btn-small" onclick="setCalendarView('week')">Setmana</button>
+            <span class="legend-note">Mostra els registres filtrats.</span>
+          </div>
+        </div>
+        <div class="calendar-weekdays" id="calendarWeekdays"></div>
+        <div class="calendar-grid month" id="calendarGrid"></div>
       </div>
 
       <div class="table-wrap">
@@ -436,7 +608,7 @@
   <dialog id="managerDialog">
     <div class="modal-head">
       <strong id="managerTitle">Gestionar</strong>
-      <button class="btn-soft" type="button" onclick="closeManager()">Tancar</button>
+      <button class="btn-soft btn-small" type="button" onclick="closeManager()">Tancar</button>
     </div>
     <div class="modal-body">
       <div class="grid">
@@ -462,12 +634,12 @@
       <div class="manager-list" id="managerList"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn-soft" type="button" onclick="closeManager()">Tancar</button>
+      <button class="btn-soft btn-small" type="button" onclick="closeManager()">Tancar</button>
     </div>
   </dialog>
 
   <script>
-    const STORAGE_KEY = "gestio_medica_familiar_v2";
+    const STORAGE_KEY = "gestio_medica_familiar_v3";
 
     const defaultData = {
       pacients: [
@@ -513,6 +685,9 @@
     let editingId = null;
     let managerType = null;
     let managerEditingIndex = null;
+    let calendarVisible = false;
+    let calendarView = 'month';
+    let calendarDate = new Date();
 
     const procedimentEl = document.getElementById("procediment");
     const pacientEl = document.getElementById("pacient");
@@ -530,6 +705,15 @@
     const observacionsEl = document.getElementById("observacions");
     const recordsBodyEl = document.getElementById("recordsBody");
     const saveBtnEl = document.getElementById("saveBtn");
+
+    const filterPacientEl = document.getElementById('filterPacient');
+    const filterEspecialitatEl = document.getElementById('filterEspecialitat');
+    const filterFromEl = document.getElementById('filterFrom');
+    const filterToEl = document.getElementById('filterTo');
+    const calendarCardEl = document.getElementById('calendarCard');
+    const calendarTitleEl = document.getElementById('calendarTitle');
+    const calendarGridEl = document.getElementById('calendarGrid');
+    const calendarWeekdaysEl = document.getElementById('calendarWeekdays');
 
     const managerDialog = document.getElementById("managerDialog");
     const managerTitle = document.getElementById("managerTitle");
@@ -565,10 +749,7 @@
 
     function normalizeList(list, fallback) {
       if (!Array.isArray(list) || !list.length) return structuredCloneFallback(fallback);
-      return list.map(item => {
-        if (typeof item === "string") return { name: item };
-        return item;
-      });
+      return list.map(item => typeof item === 'string' ? { name: item } : item);
     }
 
     function saveData() {
@@ -589,6 +770,15 @@
       }
     }
 
+    function populateFilterSelects() {
+      const pacientCurrent = filterPacientEl.value;
+      const especialitatCurrent = filterEspecialitatEl.value;
+      filterPacientEl.innerHTML = '<option value="">Tots</option>' + appData.pacients.map(p => `<option value="${escapeHtmlAttr(p.name)}">${escapeHtml(p.name)}</option>`).join('');
+      filterEspecialitatEl.innerHTML = '<option value="">Totes</option>' + appData.especialitats.map(e => `<option value="${escapeHtmlAttr(e.name)}">${escapeHtml(e.name)}</option>`).join('');
+      if ([...filterPacientEl.options].some(o => o.value === pacientCurrent)) filterPacientEl.value = pacientCurrent;
+      if ([...filterEspecialitatEl.options].some(o => o.value === especialitatCurrent)) filterEspecialitatEl.value = especialitatCurrent;
+    }
+
     function refreshSelects() {
       populateSelect(pacientEl, appData.pacients);
       populateSelect(especialitatEl, appData.especialitats);
@@ -596,6 +786,7 @@
       populateSelect(centreEl, appData.centres);
       populateSelect(metgeEl, appData.metges);
       populateSelect(coberturaEl, appData.cobertures);
+      populateFilterSelects();
       updateCost();
     }
 
@@ -609,10 +800,14 @@
       if (!dateStr) return "";
       const d = new Date(dateStr + "T00:00:00");
       d.setFullYear(d.getFullYear() + 1);
-      const y = d.getFullYear();
-      const m = String(d.getMonth() + 1).padStart(2, "0");
-      const day = String(d.getDate()).padStart(2, "0");
-      return `${y}-${m}-${day}`;
+      return formatDateInput(d);
+    }
+
+    function formatDateInput(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
     function formatEuro(value) {
@@ -627,57 +822,65 @@
     function getColorFromList(type, name) {
       const list = appData[type] || [];
       const item = list.find(x => x.name === name);
-      return item?.color || "#e5e7eb";
+      return item?.color || '#e5e7eb';
     }
 
     function escapeHtml(str) {
       return String(str)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeHtmlAttr(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
     }
 
     function updateCost() {
-      if (coberturaEl.value !== "Privat") {
-        costRealEl.value = "0.00 €";
+      if (coberturaEl.value !== 'Privat') {
+        costRealEl.value = '0.00 €';
       } else {
         costRealEl.value = formatEuro(getCatalogPrice(catalogRefEl.value));
       }
     }
 
     function updatePropera() {
-      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : "";
+      properaEl.value = avisEl.checked && dataEl.value ? addOneYear(dataEl.value) : '';
     }
 
     function validateForm() {
-      if (!procedimentEl.value.trim()) return "Falta cita / procediment.";
-      if (!pacientEl.value) return "Falta pacient.";
-      if (!especialitatEl.value) return "Falta especialitat.";
-      if (!dataEl.value) return "Falta data.";
-      if (!catalogRefEl.value) return "Falta catàleg ref.";
-      if (!centreEl.value) return "Falta centre.";
-      if (!metgeEl.value) return "Falta metge.";
-      if (!coberturaEl.value) return "Falta cobertura.";
-      return "";
+      if (!procedimentEl.value.trim()) return 'Falta cita / procediment.';
+      if (!pacientEl.value) return 'Falta pacient.';
+      if (!especialitatEl.value) return 'Falta especialitat.';
+      if (!dataEl.value) return 'Falta data.';
+      if (!catalogRefEl.value) return 'Falta catàleg ref.';
+      if (!centreEl.value) return 'Falta centre.';
+      if (!metgeEl.value) return 'Falta metge.';
+      if (!coberturaEl.value) return 'Falta cobertura.';
+      return '';
     }
 
     function getFormRecord() {
-      const cost = coberturaEl.value === "Privat" ? getCatalogPrice(catalogRefEl.value) : 0;
+      const cost = coberturaEl.value === 'Privat' ? getCatalogPrice(catalogRefEl.value) : 0;
       return {
         id: editingId || crypto.randomUUID(),
         procediment: procedimentEl.value.trim(),
         pacient: pacientEl.value,
         especialitat: especialitatEl.value,
         data: dataEl.value,
-        hora: horaEl.value || "",
+        hora: horaEl.value || '',
         estat: estatEl.checked,
         catalogRef: catalogRefEl.value,
         centre: centreEl.value,
         metge: metgeEl.value,
         avis: avisEl.checked,
-        properaRevisio: avisEl.checked ? addOneYear(dataEl.value) : "",
+        properaRevisio: avisEl.checked ? addOneYear(dataEl.value) : '',
         cobertura: coberturaEl.value,
         costReal: cost,
         observacions: observacionsEl.value.trim()
@@ -692,7 +895,6 @@
       }
 
       const record = getFormRecord();
-
       if (editingId) {
         const idx = appData.records.findIndex(r => r.id === editingId);
         if (idx >= 0) appData.records[idx] = record;
@@ -702,123 +904,144 @@
 
       saveData();
       renderRecords();
+      renderCalendar();
       resetForm();
     }
 
     function editRecord(id) {
       const r = appData.records.find(x => x.id === id);
       if (!r) return;
-
       editingId = id;
-      saveBtnEl.textContent = "Guardar canvis";
-
-      procedimentEl.value = r.procediment || "";
-      pacientEl.value = r.pacient || "";
-      especialitatEl.value = r.especialitat || "";
-      dataEl.value = r.data || "";
-      horaEl.value = r.hora || "";
+      saveBtnEl.textContent = 'Guardar canvis';
+      procedimentEl.value = r.procediment || '';
+      pacientEl.value = r.pacient || '';
+      especialitatEl.value = r.especialitat || '';
+      dataEl.value = r.data || '';
+      horaEl.value = r.hora || '';
       estatEl.checked = !!r.estat;
-      catalogRefEl.value = r.catalogRef || "";
-      centreEl.value = r.centre || "";
-      metgeEl.value = r.metge || "";
-      coberturaEl.value = r.cobertura || "";
+      catalogRefEl.value = r.catalogRef || '';
+      centreEl.value = r.centre || '';
+      metgeEl.value = r.metge || '';
+      coberturaEl.value = r.cobertura || '';
       avisEl.checked = !!r.avis;
-      observacionsEl.value = r.observacions || "";
+      observacionsEl.value = r.observacions || '';
       updateCost();
       updatePropera();
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function deleteRecord(id) {
-      if (!confirm("Vols esborrar aquest registre?")) return;
+      if (!confirm('Vols esborrar aquest registre?')) return;
       appData.records = appData.records.filter(r => r.id !== id);
       saveData();
       renderRecords();
+      renderCalendar();
+    }
+
+    function getFilteredRecords() {
+      const fp = filterPacientEl.value;
+      const fe = filterEspecialitatEl.value;
+      const ff = filterFromEl.value;
+      const ft = filterToEl.value;
+
+      return appData.records.filter(r => {
+        if (fp && r.pacient !== fp) return false;
+        if (fe && r.especialitat !== fe) return false;
+        if (ff && r.data < ff) return false;
+        if (ft && r.data > ft) return false;
+        return true;
+      }).sort((a,b) => {
+        const ad = `${a.data || ''} ${a.hora || ''}`;
+        const bd = `${b.data || ''} ${b.hora || ''}`;
+        return ad.localeCompare(bd);
+      });
     }
 
     function renderRecords() {
-      if (!appData.records.length) {
-        recordsBodyEl.innerHTML = `<tr><td colspan="15" class="empty">Encara no hi ha registres.</td></tr>`;
+      const records = getFilteredRecords();
+      if (!records.length) {
+        recordsBodyEl.innerHTML = `<tr><td colspan="15" class="empty">No hi ha registres amb aquests filtres.</td></tr>`;
         return;
       }
 
-      recordsBodyEl.innerHTML = appData.records.map(r => {
-        const pacientColor = getColorFromList("pacients", r.pacient);
-        const especialitatColor = getColorFromList("especialitats", r.especialitat);
+      recordsBodyEl.innerHTML = records.map(r => {
+        const pacientColor = getColorFromList('pacients', r.pacient);
+        const especialitatColor = getColorFromList('especialitats', r.especialitat);
         return `
           <tr>
             <td>${escapeHtml(r.procediment)}</td>
             <td><span class="mark" style="--mark-color:${pacientColor}">${escapeHtml(r.pacient)}</span></td>
             <td><span class="mark" style="--mark-color:${especialitatColor}">${escapeHtml(r.especialitat)}</span></td>
             <td>${formatDateDisplay(r.data)}</td>
-            <td>${r.hora || ""}</td>
+            <td>${r.hora || ''}</td>
             <td class="center">${r.estat ? '<span class="ok">✔</span>' : '<span class="no">—</span>'}</td>
             <td>${escapeHtml(r.catalogRef)}</td>
             <td>${escapeHtml(r.centre)}</td>
             <td>${escapeHtml(r.metge)}</td>
             <td class="center">${r.avis ? '<span class="pill">Sí</span>' : '<span class="no">—</span>'}</td>
-            <td>${r.properaRevisio ? formatDateDisplay(r.properaRevisio) : ""}</td>
+            <td>${r.properaRevisio ? formatDateDisplay(r.properaRevisio) : ''}</td>
             <td>${escapeHtml(r.cobertura)}</td>
             <td class="right price">${formatEuro(r.costReal)}</td>
-            <td>${escapeHtml(r.observacions || "")}</td>
+            <td>${escapeHtml(r.observacions || '')}</td>
             <td>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn-soft" onclick="editRecord('${r.id}')">Editar</button>
-                <button class="btn-danger" onclick="deleteRecord('${r.id}')">Esborrar</button>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn-soft btn-small" onclick="editRecord('${r.id}')">Editar</button>
+                <button class="btn-danger btn-small" onclick="deleteRecord('${r.id}')">Esborrar</button>
               </div>
             </td>
           </tr>
         `;
-      }).join("");
+      }).join('');
     }
 
     function resetForm() {
       editingId = null;
-      saveBtnEl.textContent = "Afegir registre";
-      procedimentEl.value = "";
+      saveBtnEl.textContent = 'Afegir registre';
+      procedimentEl.value = '';
       pacientEl.selectedIndex = 0;
       especialitatEl.selectedIndex = 0;
-      dataEl.value = "";
-      horaEl.value = "";
+      dataEl.value = '';
+      horaEl.value = '';
       estatEl.checked = false;
       catalogRefEl.selectedIndex = 0;
       centreEl.selectedIndex = 0;
       metgeEl.selectedIndex = 0;
       coberturaEl.selectedIndex = 0;
       avisEl.checked = false;
-      properaEl.value = "";
-      observacionsEl.value = "";
+      properaEl.value = '';
+      observacionsEl.value = '';
       updateCost();
     }
 
     function exportData() {
-      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = "gestio-medica-familiar.json";
+      a.download = 'gestio-medica-familiar.json';
       a.click();
       URL.revokeObjectURL(url);
     }
 
     function clearAllData() {
-      if (!confirm("Segur que vols esborrar tots els registres i catàlegs personalitzats?")) return;
+      if (!confirm('Segur que vols esborrar tots els registres i catàlegs personalitzats?')) return;
       appData = structuredCloneFallback(defaultData);
       saveData();
       refreshSelects();
       renderRecords();
+      renderCalendar();
       resetForm();
+      clearFilters();
     }
 
     function managerConfig(type) {
-      const map = {
-        especialitats: { title: "Gestionar especialitats", hasColor: true, hasPrice: false },
-        catalogRefs: { title: "Gestionar catàleg ref.", hasColor: false, hasPrice: true },
-        centres: { title: "Gestionar centres", hasColor: false, hasPrice: false },
-        metges: { title: "Gestionar metges", hasColor: false, hasPrice: false },
-        cobertures: { title: "Gestionar cobertures", hasColor: false, hasPrice: false }
-      };
-      return map[type];
+      return {
+        especialitats: { title: 'Gestionar especialitats', hasColor: true, hasPrice: false },
+        catalogRefs: { title: 'Gestionar catàleg ref.', hasColor: false, hasPrice: true },
+        centres: { title: 'Gestionar centres', hasColor: false, hasPrice: false },
+        metges: { title: 'Gestionar metges', hasColor: false, hasPrice: false },
+        cobertures: { title: 'Gestionar cobertures', hasColor: false, hasPrice: false }
+      }[type];
     }
 
     function openManager(type) {
@@ -826,8 +1049,8 @@
       managerEditingIndex = null;
       const cfg = managerConfig(type);
       managerTitle.textContent = cfg.title;
-      managerPriceWrap.style.display = cfg.hasPrice ? "block" : "none";
-      managerColorWrap.style.display = cfg.hasColor ? "block" : "none";
+      managerPriceWrap.style.display = cfg.hasPrice ? 'block' : 'none';
+      managerColorWrap.style.display = cfg.hasColor ? 'block' : 'none';
       resetManagerForm();
       renderManagerList();
       managerDialog.showModal();
@@ -841,16 +1064,16 @@
 
     function resetManagerForm() {
       managerEditingIndex = null;
-      managerName.value = "";
-      managerPrice.value = "";
-      managerColor.value = "#dbeafe";
+      managerName.value = '';
+      managerPrice.value = '';
+      managerColor.value = '#dbeafe';
     }
 
     function renderManagerList() {
       const list = appData[managerType] || [];
       managerList.innerHTML = list.map((item, index) => {
-        const priceText = typeof item.price !== "undefined" ? `<span class="pill">${formatEuro(item.price)}</span>` : "";
-        const colorText = item.color ? `<span class="swatch" style="background:${item.color}"></span>` : "";
+        const priceText = typeof item.price !== 'undefined' ? `<span class="pill">${formatEuro(item.price)}</span>` : '';
+        const colorText = item.color ? `<span class="swatch" style="background:${item.color}"></span>` : '';
         return `
           <div class="manager-item">
             <div class="manager-name">
@@ -858,31 +1081,30 @@
               <strong>${escapeHtml(item.name)}</strong>
               ${priceText}
             </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-              <button class="btn-soft" type="button" onclick="editManagerItem(${index})">Editar</button>
-              <button class="btn-danger" type="button" onclick="deleteManagerItem(${index})">Esborrar</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="btn-soft btn-small" type="button" onclick="editManagerItem(${index})">Editar</button>
+              <button class="btn-danger btn-small" type="button" onclick="deleteManagerItem(${index})">Esborrar</button>
             </div>
           </div>
         `;
-      }).join("") || `<div class="muted">No hi ha elements.</div>`;
+      }).join('') || `<div class="muted">No hi ha elements.</div>`;
     }
 
     function saveManagerItem() {
       if (!managerType) return;
       const name = managerName.value.trim();
       if (!name) {
-        alert("Falta el nom.");
+        alert('Falta el nom.');
         return;
       }
 
       const cfg = managerConfig(managerType);
       const item = { name };
-
-      if (cfg.hasColor) item.color = managerColor.value || "#dbeafe";
+      if (cfg.hasColor) item.color = managerColor.value || '#dbeafe';
       if (cfg.hasPrice) {
-        const price = Number(String(managerPrice.value || "0").replace(",", "."));
+        const price = Number(String(managerPrice.value || '0').replace(',', '.'));
         if (Number.isNaN(price)) {
-          alert("El preu no és vàlid.");
+          alert('El preu no és vàlid.');
           return;
         }
         item.price = price;
@@ -891,7 +1113,7 @@
       const list = appData[managerType];
       const duplicateIndex = list.findIndex((x, i) => x.name.toLowerCase() === name.toLowerCase() && i !== managerEditingIndex);
       if (duplicateIndex >= 0) {
-        alert("Ja existeix un element amb aquest nom.");
+        alert('Ja existeix un element amb aquest nom.');
         return;
       }
 
@@ -906,6 +1128,7 @@
       saveData();
       refreshSelects();
       renderRecords();
+      renderCalendar();
       resetManagerForm();
       renderManagerList();
     }
@@ -914,9 +1137,9 @@
       const item = appData[managerType][index];
       if (!item) return;
       managerEditingIndex = index;
-      managerName.value = item.name || "";
-      managerPrice.value = typeof item.price !== "undefined" ? item.price : "";
-      managerColor.value = item.color || "#dbeafe";
+      managerName.value = item.name || '';
+      managerPrice.value = typeof item.price !== 'undefined' ? item.price : '';
+      managerColor.value = item.color || '#dbeafe';
     }
 
     function deleteManagerItem(index) {
@@ -924,41 +1147,157 @@
       const item = list[index];
       if (!item) return;
       if (!confirm(`Vols esborrar "${item.name}"?`)) return;
-
       list.splice(index, 1);
       removeReferences(managerType, item.name);
       saveData();
       refreshSelects();
       renderRecords();
+      renderCalendar();
       resetManagerForm();
       renderManagerList();
     }
 
     function renameReferences(type, oldName, newName) {
       appData.records.forEach(r => {
-        if (type === "especialitats" && r.especialitat === oldName) r.especialitat = newName;
-        if (type === "catalogRefs" && r.catalogRef === oldName) r.catalogRef = newName;
-        if (type === "centres" && r.centre === oldName) r.centre = newName;
-        if (type === "metges" && r.metge === oldName) r.metge = newName;
-        if (type === "cobertures" && r.cobertura === oldName) r.cobertura = newName;
+        if (type === 'especialitats' && r.especialitat === oldName) r.especialitat = newName;
+        if (type === 'catalogRefs' && r.catalogRef === oldName) r.catalogRef = newName;
+        if (type === 'centres' && r.centre === oldName) r.centre = newName;
+        if (type === 'metges' && r.metge === oldName) r.metge = newName;
+        if (type === 'cobertures' && r.cobertura === oldName) r.cobertura = newName;
       });
     }
 
     function removeReferences(type, name) {
       appData.records.forEach(r => {
-        if (type === "especialitats" && r.especialitat === name) r.especialitat = "";
-        if (type === "catalogRefs" && r.catalogRef === name) r.catalogRef = "";
-        if (type === "centres" && r.centre === name) r.centre = "";
-        if (type === "metges" && r.metge === name) r.metge = "";
-        if (type === "cobertures" && r.cobertura === name) r.cobertura = "";
+        if (type === 'especialitats' && r.especialitat === name) r.especialitat = '';
+        if (type === 'catalogRefs' && r.catalogRef === name) r.catalogRef = '';
+        if (type === 'centres' && r.centre === name) r.centre = '';
+        if (type === 'metges' && r.metge === name) r.metge = '';
+        if (type === 'cobertures' && r.cobertura === name) r.cobertura = '';
       });
     }
 
-    coberturaEl.addEventListener("change", updateCost);
-    catalogRefEl.addEventListener("change", updateCost);
-    avisEl.addEventListener("change", updatePropera);
-    dataEl.addEventListener("change", updatePropera);
-    saveBtnEl.addEventListener("click", saveRecord);
+    function clearFilters() {
+      filterPacientEl.value = '';
+      filterEspecialitatEl.value = '';
+      filterFromEl.value = '';
+      filterToEl.value = '';
+      renderRecords();
+      renderCalendar();
+    }
+
+    function setCurrentMonthFilter() {
+      const now = new Date();
+      const first = new Date(now.getFullYear(), now.getMonth(), 1);
+      const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      filterFromEl.value = formatDateInput(first);
+      filterToEl.value = formatDateInput(last);
+      renderRecords();
+      renderCalendar();
+    }
+
+    function toggleCalendar() {
+      calendarVisible = !calendarVisible;
+      calendarCardEl.classList.toggle('show', calendarVisible);
+      if (calendarVisible) renderCalendar();
+    }
+
+    function setCalendarView(view) {
+      calendarView = view;
+      renderCalendar();
+    }
+
+    function moveCalendar(step) {
+      if (calendarView === 'month') {
+        calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth() + step, 1);
+      } else {
+        calendarDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), calendarDate.getDate() + (step * 7));
+      }
+      renderCalendar();
+    }
+
+    function startOfWeek(date) {
+      const d = new Date(date);
+      const day = (d.getDay() + 6) % 7;
+      d.setDate(d.getDate() - day);
+      d.setHours(0,0,0,0);
+      return d;
+    }
+
+    function sameDate(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    function weekdayLabels() {
+      return ['Dll', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'];
+    }
+
+    function renderCalendar() {
+      if (!calendarVisible) return;
+      calendarWeekdaysEl.innerHTML = weekdayLabels().map(w => `<div class="weekday">${w}</div>`).join('');
+      const today = new Date();
+      const records = getFilteredRecords();
+      calendarGridEl.innerHTML = '';
+
+      if (calendarView === 'month') {
+        calendarGridEl.className = 'calendar-grid month';
+        const year = calendarDate.getFullYear();
+        const month = calendarDate.getMonth();
+        calendarTitleEl.textContent = calendarDate.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+        const firstDay = new Date(year, month, 1);
+        const firstGrid = startOfWeek(firstDay);
+        for (let i = 0; i < 42; i++) {
+          const cellDate = new Date(firstGrid);
+          cellDate.setDate(firstGrid.getDate() + i);
+          const dateStr = formatDateInput(cellDate);
+          const events = records.filter(r => r.data === dateStr);
+          const isOther = cellDate.getMonth() !== month;
+          const isToday = sameDate(cellDate, today);
+          calendarGridEl.innerHTML += renderDayCell(cellDate, events, isOther, isToday);
+        }
+      } else {
+        calendarGridEl.className = 'calendar-grid week';
+        const weekStart = startOfWeek(calendarDate);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        calendarTitleEl.textContent = `Setmana ${formatDateDisplay(formatDateInput(weekStart))} - ${formatDateDisplay(formatDateInput(weekEnd))}`;
+        for (let i = 0; i < 7; i++) {
+          const cellDate = new Date(weekStart);
+          cellDate.setDate(weekStart.getDate() + i);
+          const dateStr = formatDateInput(cellDate);
+          const events = records.filter(r => r.data === dateStr);
+          const isToday = sameDate(cellDate, today);
+          calendarGridEl.innerHTML += renderDayCell(cellDate, events, false, isToday);
+        }
+      }
+    }
+
+    function renderDayCell(cellDate, events, isOther, isToday) {
+      const classes = ['day-cell'];
+      if (isOther) classes.push('other-month');
+      if (isToday) classes.push('today');
+      return `
+        <div class="${classes.join(' ')}">
+          <div class="day-num">${cellDate.getDate()}</div>
+          ${events.map(ev => {
+            const color = getColorFromList('pacients', ev.pacient);
+            return `<div class="mini-event" style="background:${color};">
+              ${ev.hora ? `<strong>${escapeHtml(ev.hora)}</strong> · ` : ''}${escapeHtml(ev.pacient)}<br>${escapeHtml(ev.procediment)}
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    filterPacientEl.addEventListener('change', () => { renderRecords(); renderCalendar(); });
+    filterEspecialitatEl.addEventListener('change', () => { renderRecords(); renderCalendar(); });
+    filterFromEl.addEventListener('change', () => { renderRecords(); renderCalendar(); });
+    filterToEl.addEventListener('change', () => { renderRecords(); renderCalendar(); });
+    coberturaEl.addEventListener('change', updateCost);
+    catalogRefEl.addEventListener('change', updateCost);
+    avisEl.addEventListener('change', updatePropera);
+    dataEl.addEventListener('change', updatePropera);
+    saveBtnEl.addEventListener('click', saveRecord);
 
     refreshSelects();
     renderRecords();
