@@ -210,7 +210,9 @@
     }
 
     th:nth-child(3),td:nth-child(3){min-width:170px;}
-    th:nth-child(8),td:nth-child(8){min-width:180px;white-space:nowrap;}
+    th:nth-child(7),td:nth-child(7){min-width:210px;white-space:nowrap;} /* Catàleg ref. */
+  th:nth-child(8),td:nth-child(8){min-width:180px;white-space:nowrap;} /* Centre */
+    th:nth-child(9),td:nth-child(9){min-width:170px;white-space:nowrap;} /* Metge */
 
     .center{text-align:center}
     .right{text-align:right}
@@ -772,6 +774,14 @@
       const [y, m, d] = yyyyMmDd.split('-');
       return `${d}/${m}/${y}`;
     }
+    function formatTimeDisplay(timeStr) {
+      if (!timeStr) return '';
+      const parts = String(timeStr).split(':');
+      if (parts.length >= 2) {
+      return `${parts[0]}:${parts[1]}`;
+    }
+  return String(timeStr).slice(0,5);
+    }
 
     function addOneYear(dateStr) {
       if (!dateStr) return '';
@@ -1013,7 +1023,7 @@
             <td><span class="mark" style="--mark-color:${pacientColor}">${escapeHtml(r.pacient)}</span></td>
             <td><span class="mark" style="--mark-color:${especialitatColor}">${escapeHtml(r.especialitat)}</span></td>
             <td>${formatDateDisplay(r.data)}</td>
-            <td>${r.hora || ''}</td>
+            <td>${formatTimeDisplay(r.hora)}</td>
             <td class="center">${r.estat ? '<span class="ok">✔</span>' : '<span class="no">—</span>'}</td>
             <td>${escapeHtml(r.catalogRef)}</td>
             <td>${escapeHtml(r.centre)}</td>
@@ -1374,7 +1384,7 @@
           ${events.map(ev => {
             const color = getColorFromList('pacients', ev.pacient);
             return `<div class="mini-event" style="background:${color};">
-              ${ev.hora ? `<strong>${escapeHtml(ev.hora)}</strong> · ` : ''}${escapeHtml(ev.pacient)}<br>${escapeHtml(ev.procediment)}
+              ${ev.hora ? `<strong>${escapeHtml(formatTimeDisplay(ev.hora))}</strong> · ` : ''}${escapeHtml(ev.pacient)}<br>${escapeHtml(ev.procediment)}
             </div>`;
           }).join('')}
         </div>
