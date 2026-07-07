@@ -112,19 +112,23 @@
         const CONFIG = { startHour: 8, endHour: 21, rowHeight: 60, conflictThresholdMins: 16 * 60 + 30 };
 
         const onaSchedule = [
-            { day: 1, start: "08:00", end: "14:30", name: "Classe" },
-            { day: 1, start: "18:00", end: "19:30", name: "Europa Àliga" },
-            { day: 2, start: "08:00", end: "13:30", name: "Classe" },
-            { day: 2, start: "15:00", end: "17:00", name: "Classe" },
-            { day: 3, start: "08:00", end: "13:30", name: "Classe" },
-            { day: 3, start: "15:40", end: "17:10", name: "Kids&Us" },
-            { day: 3, start: "18:00", end: "19:30", name: "Europa Thau" },
-            { day: 4, start: "08:00", end: "13:30", name: "Classe" },
-            { day: 4, start: "15:00", end: "17:00", name: "Classe" },
-            { day: 4, start: "19:00", end: "20:30", name: "Europa Àliga" },
-            { day: 5, start: "08:00", end: "13:30", name: "Classe" },
-            { day: 5, start: "15:40", end: "17:10", name: "Kids&Us" }
-        ];
+    { day: 1, start: "08:00", end: "14:30", name: "Classe" },
+    { day: 1, start: "17:45", end: "19:30", name: "Europa Àliga" },
+
+    { day: 2, start: "08:00", end: "13:30", name: "Classe" },
+    { day: 2, start: "15:00", end: "17:00", name: "Classe" },
+
+    { day: 3, start: "08:00", end: "13:30", name: "Classe" },
+    { day: 3, start: "15:40", end: "17:10", name: "Kids&Us" },
+    { day: 3, start: "17:45", end: "19:30", name: "Europa Àliga" },
+
+    { day: 4, start: "08:00", end: "13:30", name: "Classe" },
+    { day: 4, start: "15:00", end: "17:00", name: "Classe" },
+
+    { day: 5, start: "08:00", end: "13:30", name: "Classe" },
+    { day: 5, start: "15:40", end: "17:10", name: "Kids&Us" },
+    { day: 5, start: "20:00", end: "21:30", name: "Europa Thau" }
+];
 
         const liaSchedule = [
             ...[1,2,3,4,5].map(d => ({ day: d, start: "09:00", end: "16:30", name: "Classe" })),
